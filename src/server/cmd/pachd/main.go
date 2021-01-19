@@ -218,6 +218,17 @@ func doSidecarMode(config interface{}) (retErr error) {
 	}); err != nil {
 		return err
 	}
+	if err := logGRPCServerSetup("License API", func() error {
+		enterpriseAPIServer, err := licenseserver.New(
+			env, path.Join(env.EtcdPrefix, env.EnterpriseEtcdPrefix))
+		if err != nil {
+			return err
+		}
+		eprsclient.RegisterAPIServer(server.Server, enterpriseAPIServer)
+		return nil
+	}); err != nil {
+		return err
+	}
 	if err := logGRPCServerSetup("Health", func() error {
 		healthclient.RegisterHealthServer(server.Server, health.NewHealthServer())
 		return nil

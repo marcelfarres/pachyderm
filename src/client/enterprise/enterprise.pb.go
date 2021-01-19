@@ -8,6 +8,7 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
+	license "github.com/pachyderm/pachyderm/src/client/license"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -27,40 +28,13 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type State int32
-
-const (
-	State_NONE    State = 0
-	State_ACTIVE  State = 1
-	State_EXPIRED State = 2
-)
-
-var State_name = map[int32]string{
-	0: "NONE",
-	1: "ACTIVE",
-	2: "EXPIRED",
-}
-
-var State_value = map[string]int32{
-	"NONE":    0,
-	"ACTIVE":  1,
-	"EXPIRED": 2,
-}
-
-func (x State) String() string {
-	return proto.EnumName(State_name, int32(x))
-}
-
-func (State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{0}
-}
-
 // EnterpriseRecord is the record we store in etcd for a Pachyderm enterprise
-// token that has been provided to a Pachyderm cluster
+// that is registered with a license server
 type EnterpriseRecord struct {
-	ActivationCode string `protobuf:"bytes,1,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
-	// expires is a timestamp indicating when this activation code will expire.
-	Expires              *types.Timestamp `protobuf:"bytes,2,opt,name=expires,proto3" json:"expires,omitempty"`
+	ActivationCode       string           `protobuf:"bytes,1,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
+	LicenseServer        string           `protobuf:"bytes,2,opt,name=license_server,json=licenseServer,proto3" json:"license_server,omitempty"`
+	Secret               string           `protobuf:"bytes,3,opt,name=secret,proto3" json:"secret,omitempty"`
+	LastHeartbeat        *types.Timestamp `protobuf:"bytes,4,opt,name=last_heartbeat,json=lastHeartbeat,proto3" json:"last_heartbeat,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
 	XXX_unrecognized     []byte           `json:"-"`
 	XXX_sizecache        int32            `json:"-"`
@@ -106,82 +80,40 @@ func (m *EnterpriseRecord) GetActivationCode() string {
 	return ""
 }
 
-func (m *EnterpriseRecord) GetExpires() *types.Timestamp {
+func (m *EnterpriseRecord) GetLicenseServer() string {
 	if m != nil {
-		return m.Expires
+		return m.LicenseServer
 	}
-	return nil
+	return ""
 }
 
-// TokenInfo contains information about the currently active enterprise token
-type TokenInfo struct {
-	// expires indicates when the current token expires (unset if there is no
-	// current token)
-	Expires              *types.Timestamp `protobuf:"bytes,1,opt,name=expires,proto3" json:"expires,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
-	XXX_unrecognized     []byte           `json:"-"`
-	XXX_sizecache        int32            `json:"-"`
-}
-
-func (m *TokenInfo) Reset()         { *m = TokenInfo{} }
-func (m *TokenInfo) String() string { return proto.CompactTextString(m) }
-func (*TokenInfo) ProtoMessage()    {}
-func (*TokenInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{1}
-}
-func (m *TokenInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *TokenInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_TokenInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *TokenInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TokenInfo.Merge(m, src)
-}
-func (m *TokenInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *TokenInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_TokenInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TokenInfo proto.InternalMessageInfo
-
-func (m *TokenInfo) GetExpires() *types.Timestamp {
+func (m *EnterpriseRecord) GetSecret() string {
 	if m != nil {
-		return m.Expires
+		return m.Secret
+	}
+	return ""
+}
+
+func (m *EnterpriseRecord) GetLastHeartbeat() *types.Timestamp {
+	if m != nil {
+		return m.LastHeartbeat
 	}
 	return nil
 }
 
 type ActivateRequest struct {
-	// activation_code is a Pachyderm enterprise activation code. New users can
-	// obtain trial activation codes
-	ActivationCode string `protobuf:"bytes,1,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
-	// expires is a timestamp indicating when this activation code will expire.
-	// This should not generally be set (it's primarily used for testing), and is
-	// only applied if it's earlier than the signed expiration time in
-	// 'activation_code'.
-	Expires              *types.Timestamp `protobuf:"bytes,2,opt,name=expires,proto3" json:"expires,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
-	XXX_unrecognized     []byte           `json:"-"`
-	XXX_sizecache        int32            `json:"-"`
+	LicenseServer        string   `protobuf:"bytes,3,opt,name=license_server,json=licenseServer,proto3" json:"license_server,omitempty"`
+	Secret               string   `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ActivateRequest) Reset()         { *m = ActivateRequest{} }
 func (m *ActivateRequest) String() string { return proto.CompactTextString(m) }
 func (*ActivateRequest) ProtoMessage()    {}
 func (*ActivateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{2}
+	return fileDescriptor_88d07275108cec01, []int{1}
 }
 func (m *ActivateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -210,32 +142,32 @@ func (m *ActivateRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ActivateRequest proto.InternalMessageInfo
 
-func (m *ActivateRequest) GetActivationCode() string {
+func (m *ActivateRequest) GetLicenseServer() string {
 	if m != nil {
-		return m.ActivationCode
+		return m.LicenseServer
 	}
 	return ""
 }
 
-func (m *ActivateRequest) GetExpires() *types.Timestamp {
+func (m *ActivateRequest) GetSecret() string {
 	if m != nil {
-		return m.Expires
+		return m.Secret
 	}
-	return nil
+	return ""
 }
 
 type ActivateResponse struct {
-	Info                 *TokenInfo `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	Info                 *license.TokenInfo `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *ActivateResponse) Reset()         { *m = ActivateResponse{} }
 func (m *ActivateResponse) String() string { return proto.CompactTextString(m) }
 func (*ActivateResponse) ProtoMessage()    {}
 func (*ActivateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{3}
+	return fileDescriptor_88d07275108cec01, []int{2}
 }
 func (m *ActivateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -264,7 +196,7 @@ func (m *ActivateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ActivateResponse proto.InternalMessageInfo
 
-func (m *ActivateResponse) GetInfo() *TokenInfo {
+func (m *ActivateResponse) GetInfo() *license.TokenInfo {
 	if m != nil {
 		return m.Info
 	}
@@ -281,7 +213,7 @@ func (m *GetStateRequest) Reset()         { *m = GetStateRequest{} }
 func (m *GetStateRequest) String() string { return proto.CompactTextString(m) }
 func (*GetStateRequest) ProtoMessage()    {}
 func (*GetStateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{4}
+	return fileDescriptor_88d07275108cec01, []int{3}
 }
 func (m *GetStateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -311,8 +243,8 @@ func (m *GetStateRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_GetStateRequest proto.InternalMessageInfo
 
 type GetStateResponse struct {
-	State State      `protobuf:"varint,1,opt,name=state,proto3,enum=enterprise.State" json:"state,omitempty"`
-	Info  *TokenInfo `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
+	State license.State      `protobuf:"varint,1,opt,name=state,proto3,enum=license.State" json:"state,omitempty"`
+	Info  *license.TokenInfo `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
 	// activation_code will always be an empty string,
 	// call GetEnterpriseCode to get the activation code
 	ActivationCode       string   `protobuf:"bytes,3,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
@@ -325,7 +257,7 @@ func (m *GetStateResponse) Reset()         { *m = GetStateResponse{} }
 func (m *GetStateResponse) String() string { return proto.CompactTextString(m) }
 func (*GetStateResponse) ProtoMessage()    {}
 func (*GetStateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{5}
+	return fileDescriptor_88d07275108cec01, []int{4}
 }
 func (m *GetStateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -354,14 +286,14 @@ func (m *GetStateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetStateResponse proto.InternalMessageInfo
 
-func (m *GetStateResponse) GetState() State {
+func (m *GetStateResponse) GetState() license.State {
 	if m != nil {
 		return m.State
 	}
-	return State_NONE
+	return license.State_NONE
 }
 
-func (m *GetStateResponse) GetInfo() *TokenInfo {
+func (m *GetStateResponse) GetInfo() *license.TokenInfo {
 	if m != nil {
 		return m.Info
 	}
@@ -385,7 +317,7 @@ func (m *GetActivationCodeRequest) Reset()         { *m = GetActivationCodeReque
 func (m *GetActivationCodeRequest) String() string { return proto.CompactTextString(m) }
 func (*GetActivationCodeRequest) ProtoMessage()    {}
 func (*GetActivationCodeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{6}
+	return fileDescriptor_88d07275108cec01, []int{5}
 }
 func (m *GetActivationCodeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -415,19 +347,19 @@ func (m *GetActivationCodeRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_GetActivationCodeRequest proto.InternalMessageInfo
 
 type GetActivationCodeResponse struct {
-	State                State      `protobuf:"varint,1,opt,name=state,proto3,enum=enterprise.State" json:"state,omitempty"`
-	Info                 *TokenInfo `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
-	ActivationCode       string     `protobuf:"bytes,3,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
+	State                license.State      `protobuf:"varint,1,opt,name=state,proto3,enum=license.State" json:"state,omitempty"`
+	Info                 *license.TokenInfo `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
+	ActivationCode       string             `protobuf:"bytes,3,opt,name=activation_code,json=activationCode,proto3" json:"activation_code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetActivationCodeResponse) Reset()         { *m = GetActivationCodeResponse{} }
 func (m *GetActivationCodeResponse) String() string { return proto.CompactTextString(m) }
 func (*GetActivationCodeResponse) ProtoMessage()    {}
 func (*GetActivationCodeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{7}
+	return fileDescriptor_88d07275108cec01, []int{6}
 }
 func (m *GetActivationCodeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -456,14 +388,14 @@ func (m *GetActivationCodeResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetActivationCodeResponse proto.InternalMessageInfo
 
-func (m *GetActivationCodeResponse) GetState() State {
+func (m *GetActivationCodeResponse) GetState() license.State {
 	if m != nil {
 		return m.State
 	}
-	return State_NONE
+	return license.State_NONE
 }
 
-func (m *GetActivationCodeResponse) GetInfo() *TokenInfo {
+func (m *GetActivationCodeResponse) GetInfo() *license.TokenInfo {
 	if m != nil {
 		return m.Info
 	}
@@ -487,7 +419,7 @@ func (m *DeactivateRequest) Reset()         { *m = DeactivateRequest{} }
 func (m *DeactivateRequest) String() string { return proto.CompactTextString(m) }
 func (*DeactivateRequest) ProtoMessage()    {}
 func (*DeactivateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{8}
+	return fileDescriptor_88d07275108cec01, []int{7}
 }
 func (m *DeactivateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -526,7 +458,7 @@ func (m *DeactivateResponse) Reset()         { *m = DeactivateResponse{} }
 func (m *DeactivateResponse) String() string { return proto.CompactTextString(m) }
 func (*DeactivateResponse) ProtoMessage()    {}
 func (*DeactivateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_88d07275108cec01, []int{9}
+	return fileDescriptor_88d07275108cec01, []int{8}
 }
 func (m *DeactivateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -556,9 +488,7 @@ func (m *DeactivateResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_DeactivateResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterEnum("enterprise.State", State_name, State_value)
 	proto.RegisterType((*EnterpriseRecord)(nil), "enterprise.EnterpriseRecord")
-	proto.RegisterType((*TokenInfo)(nil), "enterprise.TokenInfo")
 	proto.RegisterType((*ActivateRequest)(nil), "enterprise.ActivateRequest")
 	proto.RegisterType((*ActivateResponse)(nil), "enterprise.ActivateResponse")
 	proto.RegisterType((*GetStateRequest)(nil), "enterprise.GetStateRequest")
@@ -574,37 +504,39 @@ func init() {
 }
 
 var fileDescriptor_88d07275108cec01 = []byte{
-	// 473 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0x4d, 0x6f, 0xd3, 0x40,
-	0x10, 0xcd, 0xa6, 0xdf, 0x53, 0xa9, 0x71, 0x16, 0x90, 0x82, 0x81, 0x50, 0xad, 0x40, 0x2d, 0x3d,
-	0xd8, 0x52, 0xe8, 0x95, 0x83, 0xdb, 0x5a, 0x51, 0x0e, 0x94, 0xca, 0x44, 0x08, 0x71, 0x41, 0x8e,
-	0x33, 0x49, 0x57, 0x34, 0x5e, 0xd7, 0xbb, 0x41, 0xf0, 0x2b, 0xb8, 0xf2, 0x93, 0x10, 0x27, 0x7e,
-	0x02, 0xca, 0x2f, 0x41, 0xb5, 0x6b, 0x7b, 0xed, 0x18, 0x85, 0x0b, 0x52, 0x6f, 0xab, 0x37, 0x6f,
-	0xdf, 0x7b, 0x9e, 0x19, 0x2f, 0xb0, 0xe0, 0x8a, 0x63, 0xa8, 0x6c, 0x0c, 0x15, 0xc6, 0x51, 0xcc,
-	0x25, 0x6a, 0x47, 0x2b, 0x8a, 0x85, 0x12, 0x14, 0x0a, 0xc4, 0x7c, 0x3a, 0x15, 0x62, 0x7a, 0x85,
-	0x76, 0x52, 0x19, 0xcd, 0x27, 0xb6, 0xe2, 0x33, 0x94, 0xca, 0x9f, 0x45, 0x29, 0x99, 0x5d, 0x83,
-	0xe1, 0xe6, 0x74, 0x0f, 0x03, 0x11, 0x8f, 0xe9, 0x01, 0xb4, 0xfc, 0x40, 0xf1, 0xcf, 0xbe, 0xe2,
-	0x22, 0xfc, 0x18, 0x88, 0x31, 0x76, 0xc8, 0x3e, 0x39, 0xdc, 0xf1, 0xf6, 0x0a, 0xf8, 0x54, 0x8c,
-	0x91, 0x1e, 0xc3, 0x16, 0x7e, 0x89, 0x78, 0x8c, 0xb2, 0xd3, 0xdc, 0x27, 0x87, 0xbb, 0x3d, 0xd3,
-	0x4a, 0xfd, 0xac, 0xcc, 0xcf, 0x1a, 0x66, 0x7e, 0x5e, 0x46, 0x65, 0x0e, 0xec, 0x0c, 0xc5, 0x27,
-	0x0c, 0x07, 0xe1, 0x44, 0xe8, 0x12, 0xe4, 0xdf, 0x25, 0x22, 0x68, 0x39, 0x69, 0x14, 0xf4, 0xf0,
-	0x7a, 0x8e, 0x52, 0xfd, 0xef, 0xd0, 0xaf, 0xc0, 0x28, 0x1c, 0x65, 0x24, 0x42, 0x89, 0xf4, 0x05,
-	0xac, 0xf3, 0x70, 0x22, 0x6e, 0x83, 0x3f, 0xb0, 0xb4, 0x49, 0xe4, 0x1f, 0xe8, 0x25, 0x14, 0xd6,
-	0x86, 0x56, 0x1f, 0xd5, 0x5b, 0x55, 0x04, 0x66, 0xdf, 0x08, 0x18, 0x05, 0x76, 0x2b, 0x79, 0x00,
-	0x1b, 0xf2, 0x06, 0x48, 0x34, 0xf7, 0x7a, 0x6d, 0x5d, 0x33, 0x65, 0xa6, 0xf5, 0xdc, 0xbb, 0xb9,
-	0xd2, 0xbb, 0xae, 0x33, 0x6b, 0x75, 0x9d, 0x61, 0x26, 0x74, 0xfa, 0xa8, 0x9c, 0x12, 0x98, 0xa5,
-	0xfd, 0x4e, 0xe0, 0x61, 0x4d, 0xf1, 0x2e, 0xc4, 0xbe, 0x07, 0xed, 0x33, 0xf4, 0xcb, 0xeb, 0xc0,
-	0xee, 0x03, 0xd5, 0xc1, 0x34, 0xe7, 0xd1, 0x11, 0x6c, 0x24, 0x71, 0xe8, 0x36, 0xac, 0x9f, 0xbf,
-	0x39, 0x77, 0x8d, 0x06, 0x05, 0xd8, 0x74, 0x4e, 0x87, 0x83, 0x77, 0xae, 0x41, 0xe8, 0x2e, 0x6c,
-	0xb9, 0xef, 0x2f, 0x06, 0x9e, 0x7b, 0x66, 0x34, 0x7b, 0x3f, 0x9b, 0xb0, 0xe6, 0x5c, 0x0c, 0x68,
-	0x1f, 0xb6, 0xb3, 0xc9, 0xd3, 0x47, 0x7a, 0xe0, 0xca, 0x06, 0x9a, 0x8f, 0xeb, 0x8b, 0xa9, 0x35,
-	0x6b, 0xdc, 0x08, 0x65, 0xf3, 0x2e, 0x0b, 0x55, 0x36, 0xa3, 0x2c, 0x54, 0x5d, 0x11, 0xd6, 0xa0,
-	0x23, 0x68, 0x2f, 0x8d, 0x82, 0x3e, 0xab, 0x5c, 0xaa, 0x1d, 0xa3, 0xf9, 0x7c, 0x05, 0x2b, 0xf7,
-	0x78, 0x0d, 0x50, 0xf4, 0x8f, 0x3e, 0xd1, 0xaf, 0x2d, 0x35, 0xdb, 0xec, 0xfe, 0xad, 0x9c, 0xc9,
-	0x9d, 0x9c, 0xfc, 0x58, 0x74, 0xc9, 0xaf, 0x45, 0x97, 0xfc, 0x5e, 0x74, 0xc9, 0x87, 0xe3, 0x29,
-	0x57, 0x97, 0xf3, 0x91, 0x15, 0x88, 0x99, 0x1d, 0xf9, 0xc1, 0xe5, 0xd7, 0x31, 0xc6, 0xfa, 0x49,
-	0xc6, 0x81, 0xbd, 0xf4, 0xd0, 0x8d, 0x36, 0x93, 0xff, 0xf3, 0xe5, 0x9f, 0x00, 0x00, 0x00, 0xff,
-	0xff, 0x1f, 0x92, 0x92, 0xc4, 0x04, 0x05, 0x00, 0x00,
+	// 498 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x54, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0xed, 0xda, 0xa6, 0x0a, 0x53, 0xd5, 0x71, 0x16, 0x84, 0x8c, 0x29, 0xa1, 0x5a, 0xb5, 0xd0,
+	0x93, 0x2d, 0x05, 0x4e, 0xdc, 0x52, 0x40, 0xa1, 0x95, 0x90, 0x90, 0xdb, 0x13, 0x42, 0x8a, 0x6c,
+	0x67, 0x92, 0x58, 0x24, 0x5e, 0xb3, 0xbb, 0xa9, 0xc4, 0x4f, 0xe0, 0xca, 0xff, 0xe1, 0x8e, 0x38,
+	0xf1, 0x13, 0x50, 0x7e, 0x09, 0x8a, 0x3f, 0x62, 0x27, 0x31, 0xe5, 0xc8, 0xc9, 0xeb, 0xf7, 0x66,
+	0xde, 0xbe, 0x9d, 0xe7, 0x35, 0xb0, 0x68, 0x16, 0x63, 0xa2, 0x3c, 0x4c, 0x14, 0x8a, 0x54, 0xc4,
+	0x12, 0x6b, 0x4b, 0x37, 0x15, 0x5c, 0x71, 0x0a, 0x15, 0xe2, 0x3c, 0x99, 0x70, 0x3e, 0x99, 0xa1,
+	0x97, 0x31, 0xe1, 0x62, 0xec, 0xa9, 0x78, 0x8e, 0x52, 0x05, 0xf3, 0x34, 0x2f, 0x76, 0x8e, 0x0a,
+	0xc1, 0x59, 0x1c, 0x61, 0x22, 0xb1, 0x7c, 0xe6, 0x2c, 0xfb, 0x4e, 0xc0, 0x7a, 0xb3, 0x56, 0xf3,
+	0x31, 0xe2, 0x62, 0x44, 0x9f, 0x41, 0x3b, 0x88, 0x54, 0x7c, 0x13, 0xa8, 0x98, 0x27, 0xc3, 0x88,
+	0x8f, 0xd0, 0x26, 0xc7, 0xe4, 0xec, 0xae, 0x6f, 0x56, 0xf0, 0x2b, 0x3e, 0x42, 0x7a, 0x0a, 0x66,
+	0x21, 0x37, 0x94, 0x28, 0x6e, 0x50, 0xd8, 0x5a, 0x56, 0x77, 0x58, 0xa0, 0x57, 0x19, 0x48, 0x1f,
+	0xc0, 0xbe, 0xc4, 0x48, 0xa0, 0xb2, 0xf5, 0x8c, 0x2e, 0xde, 0x68, 0x1f, 0xcc, 0x59, 0x20, 0xd5,
+	0x70, 0x8a, 0x81, 0x50, 0x21, 0x06, 0xca, 0x36, 0x8e, 0xc9, 0xd9, 0x41, 0xcf, 0x71, 0xf3, 0x43,
+	0xb9, 0xe5, 0xa1, 0xdc, 0xeb, 0xf2, 0x50, 0xfe, 0xe1, 0xaa, 0xe3, 0x6d, 0xd9, 0xc0, 0x3e, 0x42,
+	0xbb, 0x9f, 0x7b, 0x42, 0x1f, 0x3f, 0x2f, 0x50, 0xaa, 0x06, 0x53, 0xfa, 0xed, 0xa6, 0x8c, 0xba,
+	0xa9, 0x4b, 0xa3, 0x45, 0x2c, 0xed, 0xd2, 0x68, 0x69, 0x96, 0xce, 0x5e, 0x82, 0x55, 0xa9, 0xcb,
+	0x94, 0x27, 0x12, 0xe9, 0x53, 0x30, 0xe2, 0x64, 0xcc, 0xb3, 0x89, 0x1c, 0xf4, 0xa8, 0x5b, 0xce,
+	0xf3, 0x9a, 0x7f, 0xc2, 0xe4, 0x22, 0x19, 0x73, 0x3f, 0xe3, 0x59, 0x07, 0xda, 0x03, 0x54, 0x57,
+	0xaa, 0x72, 0xc6, 0xbe, 0x12, 0xb0, 0x2a, 0xac, 0xd0, 0x3b, 0x81, 0x3b, 0x72, 0x05, 0x64, 0x82,
+	0x66, 0xcf, 0x5c, 0x0b, 0xe6, 0x65, 0x39, 0xb9, 0xde, 0x55, 0xbb, 0x7d, 0xd7, 0xa6, 0xe8, 0xf4,
+	0xa6, 0xe8, 0x98, 0x03, 0xf6, 0x00, 0x55, 0x7f, 0x03, 0x2c, 0x7d, 0x7e, 0x23, 0xf0, 0xb0, 0x81,
+	0xfc, 0xbf, 0x86, 0xef, 0x41, 0xe7, 0x35, 0x06, 0x9b, 0x59, 0xb3, 0xfb, 0x40, 0xeb, 0x60, 0xee,
+	0xb0, 0xf7, 0x53, 0x03, 0xbd, 0xff, 0xfe, 0x82, 0x0e, 0xa0, 0x55, 0xc6, 0x47, 0x1f, 0xb9, 0xb5,
+	0x6b, 0xb4, 0xf5, 0xc9, 0x38, 0x47, 0xcd, 0x64, 0x2e, 0xc7, 0xf6, 0x56, 0x42, 0x65, 0x6e, 0x9b,
+	0x42, 0x5b, 0x09, 0x6f, 0x0a, 0x6d, 0x47, 0xcd, 0xf6, 0x68, 0x08, 0x9d, 0x9d, 0xc1, 0xd2, 0x93,
+	0xad, 0xa6, 0xc6, 0x50, 0x9c, 0xd3, 0x7f, 0x54, 0xad, 0xf7, 0x78, 0x07, 0x50, 0xcd, 0x84, 0x3e,
+	0xae, 0xb7, 0xed, 0x0c, 0xd0, 0xe9, 0xfe, 0x8d, 0x2e, 0xe5, 0xce, 0xcf, 0x7f, 0x2c, 0xbb, 0xe4,
+	0xd7, 0xb2, 0x4b, 0x7e, 0x2f, 0xbb, 0xe4, 0xc3, 0x8b, 0x49, 0xac, 0xa6, 0x8b, 0xd0, 0x8d, 0xf8,
+	0xdc, 0x4b, 0x83, 0x68, 0xfa, 0x65, 0x84, 0xa2, 0xbe, 0x92, 0x22, 0xf2, 0x76, 0xfe, 0x60, 0xe1,
+	0x7e, 0x76, 0x91, 0x9f, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0x0c, 0xe5, 0xd5, 0x3e, 0xdd, 0x04,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -837,15 +769,29 @@ func (m *EnterpriseRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if m.Expires != nil {
+	if m.LastHeartbeat != nil {
 		{
-			size, err := m.Expires.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.LastHeartbeat.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
 			i -= size
 			i = encodeVarintEnterprise(dAtA, i, uint64(size))
 		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Secret) > 0 {
+		i -= len(m.Secret)
+		copy(dAtA[i:], m.Secret)
+		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.Secret)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.LicenseServer) > 0 {
+		i -= len(m.LicenseServer)
+		copy(dAtA[i:], m.LicenseServer)
+		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.LicenseServer)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -853,45 +799,6 @@ func (m *EnterpriseRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.ActivationCode)
 		copy(dAtA[i:], m.ActivationCode)
 		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.ActivationCode)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *TokenInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *TokenInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TokenInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Expires != nil {
-		{
-			size, err := m.Expires.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintEnterprise(dAtA, i, uint64(size))
-		}
 		i--
 		dAtA[i] = 0xa
 	}
@@ -922,24 +829,19 @@ func (m *ActivateRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if m.Expires != nil {
-		{
-			size, err := m.Expires.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintEnterprise(dAtA, i, uint64(size))
-		}
+	if len(m.Secret) > 0 {
+		i -= len(m.Secret)
+		copy(dAtA[i:], m.Secret)
+		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.Secret)))
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x22
 	}
-	if len(m.ActivationCode) > 0 {
-		i -= len(m.ActivationCode)
-		copy(dAtA[i:], m.ActivationCode)
-		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.ActivationCode)))
+	if len(m.LicenseServer) > 0 {
+		i -= len(m.LicenseServer)
+		copy(dAtA[i:], m.LicenseServer)
+		i = encodeVarintEnterprise(dAtA, i, uint64(len(m.LicenseServer)))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x1a
 	}
 	return len(dAtA) - i, nil
 }
@@ -1214,24 +1116,16 @@ func (m *EnterpriseRecord) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovEnterprise(uint64(l))
 	}
-	if m.Expires != nil {
-		l = m.Expires.Size()
+	l = len(m.LicenseServer)
+	if l > 0 {
 		n += 1 + l + sovEnterprise(uint64(l))
 	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
+	l = len(m.Secret)
+	if l > 0 {
+		n += 1 + l + sovEnterprise(uint64(l))
 	}
-	return n
-}
-
-func (m *TokenInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Expires != nil {
-		l = m.Expires.Size()
+	if m.LastHeartbeat != nil {
+		l = m.LastHeartbeat.Size()
 		n += 1 + l + sovEnterprise(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
@@ -1246,12 +1140,12 @@ func (m *ActivateRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.ActivationCode)
+	l = len(m.LicenseServer)
 	if l > 0 {
 		n += 1 + l + sovEnterprise(uint64(l))
 	}
-	if m.Expires != nil {
-		l = m.Expires.Size()
+	l = len(m.Secret)
+	if l > 0 {
 		n += 1 + l + sovEnterprise(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
@@ -1439,9 +1333,9 @@ func (m *EnterpriseRecord) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Expires", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field LicenseServer", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEnterprise
@@ -1451,82 +1345,59 @@ func (m *EnterpriseRecord) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEnterprise
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEnterprise
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Expires == nil {
-				m.Expires = &types.Timestamp{}
-			}
-			if err := m.Expires.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.LicenseServer = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipEnterprise(dAtA[iNdEx:])
-			if err != nil {
-				return err
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Secret", wireType)
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEnterprise
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEnterprise
 			}
-			if (iNdEx + skippy) > l {
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEnterprise
+			}
+			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *TokenInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowEnterprise
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TokenInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TokenInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+			m.Secret = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Expires", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field LastHeartbeat", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1553,10 +1424,10 @@ func (m *TokenInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Expires == nil {
-				m.Expires = &types.Timestamp{}
+			if m.LastHeartbeat == nil {
+				m.LastHeartbeat = &types.Timestamp{}
 			}
-			if err := m.Expires.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.LastHeartbeat.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1611,9 +1482,9 @@ func (m *ActivateRequest) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: ActivateRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
+		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ActivationCode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field LicenseServer", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1641,13 +1512,13 @@ func (m *ActivateRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ActivationCode = string(dAtA[iNdEx:postIndex])
+			m.LicenseServer = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Expires", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Secret", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEnterprise
@@ -1657,27 +1528,23 @@ func (m *ActivateRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEnterprise
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEnterprise
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Expires == nil {
-				m.Expires = &types.Timestamp{}
-			}
-			if err := m.Expires.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.Secret = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1760,7 +1627,7 @@ func (m *ActivateResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Info == nil {
-				m.Info = &TokenInfo{}
+				m.Info = &license.TokenInfo{}
 			}
 			if err := m.Info.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -1882,7 +1749,7 @@ func (m *GetStateResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.State |= State(b&0x7F) << shift
+				m.State |= license.State(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1917,7 +1784,7 @@ func (m *GetStateResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Info == nil {
-				m.Info = &TokenInfo{}
+				m.Info = &license.TokenInfo{}
 			}
 			if err := m.Info.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -2071,7 +1938,7 @@ func (m *GetActivationCodeResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.State |= State(b&0x7F) << shift
+				m.State |= license.State(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2106,7 +1973,7 @@ func (m *GetActivationCodeResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Info == nil {
-				m.Info = &TokenInfo{}
+				m.Info = &license.TokenInfo{}
 			}
 			if err := m.Info.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
