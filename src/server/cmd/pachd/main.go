@@ -15,6 +15,7 @@ import (
 	eprsclient "github.com/pachyderm/pachyderm/src/client/enterprise"
 	healthclient "github.com/pachyderm/pachyderm/src/client/health"
 	identityclient "github.com/pachyderm/pachyderm/src/client/identity"
+	licenseclient "github.com/pachyderm/pachyderm/src/client/license"
 	pfsclient "github.com/pachyderm/pachyderm/src/client/pfs"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"
 	"github.com/pachyderm/pachyderm/src/client/pkg/grpcutil"
@@ -29,6 +30,7 @@ import (
 	eprsserver "github.com/pachyderm/pachyderm/src/server/enterprise/server"
 	"github.com/pachyderm/pachyderm/src/server/health"
 	identity_server "github.com/pachyderm/pachyderm/src/server/identity/server"
+	licenseserver "github.com/pachyderm/pachyderm/src/server/license/server"
 	pfs_server "github.com/pachyderm/pachyderm/src/server/pfs/server"
 	"github.com/pachyderm/pachyderm/src/server/pkg/auth"
 	"github.com/pachyderm/pachyderm/src/server/pkg/clusterstate"
@@ -209,17 +211,6 @@ func doSidecarMode(config interface{}) (retErr error) {
 	}
 	if err := logGRPCServerSetup("Enterprise API", func() error {
 		enterpriseAPIServer, err := eprsserver.NewEnterpriseServer(
-			env, path.Join(env.EtcdPrefix, env.EnterpriseEtcdPrefix))
-		if err != nil {
-			return err
-		}
-		eprsclient.RegisterAPIServer(server.Server, enterpriseAPIServer)
-		return nil
-	}); err != nil {
-		return err
-	}
-	if err := logGRPCServerSetup("License API", func() error {
-		enterpriseAPIServer, err := licenseserver.New(
 			env, path.Join(env.EtcdPrefix, env.EnterpriseEtcdPrefix))
 		if err != nil {
 			return err
@@ -435,6 +426,17 @@ func doFullMode(config interface{}) (retErr error) {
 				return err
 			}
 			eprsclient.RegisterAPIServer(externalServer.Server, enterpriseAPIServer)
+			return nil
+		}); err != nil {
+			return err
+		}
+		if err := logGRPCServerSetup("License API", func() error {
+			licenseAPIServer, err := licenseserver.New(
+				env, path.Join(env.EtcdPrefix, env.EnterpriseEtcdPrefix))
+			if err != nil {
+				return err
+			}
+			licenseclient.RegisterAPIServer(externalServer.Server, licenseAPIServer)
 			return nil
 		}); err != nil {
 			return err

@@ -9,9 +9,9 @@ import (
 
 	"github.com/pachyderm/pachyderm/src/client/auth"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"
-	"github.com/pachyderm/pachyderm/src/client/pkg/random"
 	"github.com/pachyderm/pachyderm/src/server/pkg/backoff"
 	col "github.com/pachyderm/pachyderm/src/server/pkg/collection"
+	"github.com/pachyderm/pachyderm/src/server/pkg/random"
 	"github.com/pachyderm/pachyderm/src/server/pkg/watch"
 
 	oidc "github.com/coreos/go-oidc"

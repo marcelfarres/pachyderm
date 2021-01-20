@@ -30,6 +30,7 @@ import (
 	"github.com/pachyderm/pachyderm/src/client/enterprise"
 	"github.com/pachyderm/pachyderm/src/client/health"
 	"github.com/pachyderm/pachyderm/src/client/identity"
+	"github.com/pachyderm/pachyderm/src/client/license"
 	"github.com/pachyderm/pachyderm/src/client/limit"
 	"github.com/pachyderm/pachyderm/src/client/pfs"
 	"github.com/pachyderm/pachyderm/src/client/pkg/config"
@@ -94,6 +95,7 @@ type APIClient struct {
 	AdminAPIClient
 	TransactionAPIClient
 	DebugClient
+	License    license.APIClient
 	Enterprise enterprise.APIClient // not embedded--method name conflicts with AuthAPIClient
 
 	// addr is a "host:port" string pointing at a pachd endpoint
