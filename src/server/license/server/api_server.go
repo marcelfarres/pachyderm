@@ -1,21 +1,23 @@
 package server
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"time"
 
 	"github.com/gogo/protobuf/types"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/net/context"
 
+	"github.com/pachyderm/pachyderm/src/client"
 	"github.com/pachyderm/pachyderm/src/client/auth"
 	lc "github.com/pachyderm/pachyderm/src/client/license"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"
+	"github.com/pachyderm/pachyderm/src/client/version"
 	"github.com/pachyderm/pachyderm/src/server/pkg/backoff"
 	col "github.com/pachyderm/pachyderm/src/server/pkg/collection"
 	"github.com/pachyderm/pachyderm/src/server/pkg/keycache"
 	"github.com/pachyderm/pachyderm/src/server/pkg/license"
 	"github.com/pachyderm/pachyderm/src/server/pkg/log"
+	"github.com/pachyderm/pachyderm/src/server/pkg/random"
 	"github.com/pachyderm/pachyderm/src/server/pkg/serviceenv"
 )
 
@@ -191,8 +193,8 @@ func (a *apiServer) Deactivate(ctx context.Context, req *lc.DeactivateRequest) (
 	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
 
 	// Delete all cluster records
-	if err := a.db.SelectContext(ctx, `DELETE FROM license.clusters`); err != nil {
-		return errors.Wrapf(err, "unable to delete clusters in table")
+	if _, err := a.db.ExecContext(ctx, `DELETE FROM license.clusters`); err != nil {
+		return nil, errors.Wrapf(err, "unable to delete clusters in table")
 	}
 
 	// Delete the license from etcd
@@ -249,17 +251,21 @@ func (a *apiServer) AddCluster(ctx context.Context, req *lc.AddClusterRequest) (
 	}
 
 	// Attempt to connect to the pachd
-	pachClient := client.NewFromAddress(req.Address)
+	pachClient, err := client.NewFromAddress(req.Address)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to create client for %q", req.Address)
+	}
+
 	versionResp, err := pachClient.GetVersion(ctx, &types.Empty{})
 	if err != nil {
-		return nil, errors.Wrapdf(err, "unable to connect to pachd at %q", req.Address)
+		return nil, errors.Wrapf(err, "unable to connect to pachd at %q", req.Address)
 	}
 
 	// Generate the new shared secret for this pachd
 	secret := random.String(30)
 
 	// Register the pachd in the database
-	if err := a.db.SelectContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, enabled, auth_enabled) VALUES ($1, $2, $3, $4, %5, $6)`, req.Id, req.Address, secret, version.String(versionResp), true, false); err != nil {
+	if _, err := a.db.ExecContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, enabled, auth_enabled) VALUES ($1, $2, $3, $4, %5, $6)`, req.Id, req.Address, secret, version.String(versionResp), true, false); err != nil {
 		return nil, errors.Wrapf(err, "unable to register pachd in database")
 	}
 
@@ -273,15 +279,15 @@ func (a *apiServer) Heartbeat(ctx context.Context, req *lc.HeartbeatRequest) (re
 	defer func(start time.Time) { a.pachLogger.Log(nil, resp, retErr, time.Since(start)) }(time.Now())
 
 	var count int
-	if err := t.db.GetContext(ctx, &count, `SELECT COUNT(*) FROM license.clusters WHERE id=$1 and secret=$2 and enabled`, req.Id, req.Secret); err != nil {
+	if err := a.db.GetContext(ctx, &count, `SELECT COUNT(*) FROM license.clusters WHERE id=$1 and secret=$2 and enabled`, req.Id, req.Secret); err != nil {
 		return nil, errors.Wrapf(err, "unable to look up cluster in database")
 	}
 
 	if count != 1 {
-		return nil, errors.New(err, "invalid cluster id or secret")
+		return nil, errors.New("invalid cluster id or secret")
 	}
 
-	if err := t.db.SelectContext(ctx, `UPDATE license.clusters SET version=$1 AND auth_enabled=$2 AND last_heartbeat=NOW()`, req.Version, req.AuthEnabled); err != nil {
+	if _, err := a.db.ExecContext(ctx, `UPDATE license.clusters SET version=$1 AND auth_enabled=$2 AND last_heartbeat=NOW()`, req.Version, req.AuthEnabled); err != nil {
 		return nil, errors.Wrapf(err, "unable to update cluster in database")
 	}
 

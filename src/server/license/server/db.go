@@ -11,7 +11,7 @@ var desiredClusterState migrations.State = migrations.InitialState().
 		return err
 	}).
 	Apply("clusters table v0", func(ctx context.Context, env migrations.Env) error {
-		return env.Tx.ExecContext(ctx, `
+		_, err := env.Tx.ExecContext(ctx, `
 CREATE TABLE IF NOT EXISTS license.clusters (
 	id VARCHAR(4096) PRIMARY KEY,
 	address VARCHAR(4096) NOT NULL,
@@ -23,4 +23,5 @@ CREATE TABLE IF NOT EXISTS license.clusters (
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 );
 `)
+		return err
 	})

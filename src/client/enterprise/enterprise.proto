@@ -11,13 +11,11 @@ import "client/license/license.proto";
 // EnterpriseRecord is the record we store in etcd for a Pachyderm enterprise
 // that is registered with a license server
 message EnterpriseRecord {
-  string activation_code = 1;
+  string license_server = 1;
+  string secret = 2;
+  google.protobuf.Timestamp last_heartbeat = 3;
 
-  string license_server = 2;
-
-  string secret = 3;
-  
-  google.protobuf.Timestamp last_heartbeat = 4;
+  license.LicenseRecord license = 4;
 }
 
 //// Enterprise Activation API
