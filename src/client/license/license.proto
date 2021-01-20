@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 
 // LicenseRecord is the record we store in etcd for a Pachyderm enterprise
 // token that has been provided to a Pachyderm license server
-message EnterpriseRecord {
+message LicenseRecord {
   string activation_code = 1;
 
   google.protobuf.Timestamp expires = 2;
@@ -68,10 +68,13 @@ message DeleteClusterResponse {}
 
 message HeartbeatRequest {
   string id = 1;
+  string secret = 2;
+  string version = 3;
+  bool auth_enabled = 4;
 }
 
 message HeartbeatResponse {
-  string activation_code = 1;
+  LicenseRecord license = 1;
 }
 
 service API {
@@ -90,7 +93,6 @@ service API {
   rpc Deactivate(DeactivateRequest) returns (DeactivateResponse) {}
 
   rpc AddCluster(AddClusterRequest) returns (AddClusterResponse) {}
-  rpc DeleteCluster(DeleteClusterRequest) returns (DeleteClusterResponse) {}
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
 }
 

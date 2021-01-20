@@ -31,6 +31,7 @@ const (
 type apiServer struct {
 	pachLogger log.Logger
 	env        *serviceenv.ServiceEnv
+	db         *sqlx.DB
 
 	enterpriseTokenCache *keycache.Cache
 
@@ -60,6 +61,7 @@ func NewEnterpriseServer(env *serviceenv.ServiceEnv, etcdPrefix string) (lc.APIS
 		env:                  env,
 		enterpriseTokenCache: keycache.NewCache(enterpriseToken, enterpriseTokenKey, defaultRecord),
 		enterpriseToken:      enterpriseToken,
+		db:                   env.GetDBClient(),
 	}
 	go s.enterpriseTokenCache.Watch()
 	return s, nil
@@ -172,11 +174,28 @@ func (a *apiServer) getLicenseRecord() (*lc.GetActivationCodeResponse, error) {
 	return resp, nil
 }
 
+func (a *apiServer) checkLicenseState() error {
+	record, err := a.getLicenseRecord()
+	if err != nil {
+		return err
+	}
+	if record.State != lc.State_ACTIVE {
+		return errors.New("enterprise license is not valid")
+	}
+	return nil
+}
+
 // Deactivate deletes the current enterprise license token, disabling the license service.
 func (a *apiServer) Deactivate(ctx context.Context, req *lc.DeactivateRequest) (resp *lc.DeactivateResponse, retErr error) {
 	a.LogReq(req)
 	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
 
+	// Delete all cluster records
+	if err := a.db.SelectContext(ctx, `DELETE FROM license.clusters`); err != nil {
+		return errors.Wrapf(err, "unable to delete clusters in table")
+	}
+
+	// Delete the license from etcd
 	if _, err := col.NewSTM(ctx, a.env.GetEtcdClient(), func(stm col.STM) error {
 		err := a.enterpriseToken.ReadWrite(stm).Delete(enterpriseTokenKey)
 		if err != nil && !col.IsErrNotFound(err) {
@@ -209,23 +228,69 @@ func (a *apiServer) Deactivate(ctx context.Context, req *lc.DeactivateRequest) (
 	return &lc.DeactivateResponse{}, nil
 }
 
+// AddCluster registers a new pachd with this license server. Each pachd is configured with a shared secret
+// which is used to authenticate to the license server when heartbeating.
 func (a *apiServer) AddCluster(ctx context.Context, req *lc.AddClusterRequest) (resp *lc.AddClusterResponse, retErr error) {
 	a.LogReq(req)
 	defer func(start time.Time) { a.pachLogger.Log(req, nil, retErr, time.Since(start)) }(time.Now())
 
-	return &lc.AddClusterResponse{}, nil
-}
+	// Make sure we have an active license
+	if err := a.checkLicenseState(); err != nil {
+		return nil, err
+	}
 
-func (a *apiServer) DeleteCluster(ctx context.Context, req *lc.DeleteClusterRequest) (resp *lc.DeleteClusterResponse, retErr error) {
-	a.LogReq(req)
-	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+	// Validate the request
+	if req.Id == "" {
+		return nil, errors.New("no id provided for cluster")
+	}
 
-	return &lc.DeleteClusterResponse{}, nil
+	if req.Address == "" {
+		return nil, errors.New("no address provided for cluster")
+	}
+
+	// Attempt to connect to the pachd
+	pachClient := client.NewFromAddress(req.Address)
+	versionResp, err := pachClient.GetVersion(ctx, &types.Empty{})
+	if err != nil {
+		return nil, errors.Wrapdf(err, "unable to connect to pachd at %q", req.Address)
+	}
+
+	// Generate the new shared secret for this pachd
+	secret := random.String(30)
+
+	// Register the pachd in the database
+	if err := a.db.SelectContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, enabled, auth_enabled) VALUES ($1, $2, $3, $4, %5, $6)`, req.Id, req.Address, secret, version.String(versionResp), true, false); err != nil {
+		return nil, errors.Wrapf(err, "unable to register pachd in database")
+	}
+
+	return &lc.AddClusterResponse{
+		Secret: secret,
+	}, nil
 }
 
 func (a *apiServer) Heartbeat(ctx context.Context, req *lc.HeartbeatRequest) (resp *lc.HeartbeatResponse, retErr error) {
 	a.LogReq(req)
-	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+	defer func(start time.Time) { a.pachLogger.Log(nil, resp, retErr, time.Since(start)) }(time.Now())
 
-	return &lc.HeartbeatResponse{}, nil
+	var count int
+	if err := t.db.GetContext(ctx, &count, `SELECT COUNT(*) FROM license.clusters WHERE id=$1 and secret=$2 and enabled`, req.Id, req.Secret); err != nil {
+		return nil, errors.Wrapf(err, "unable to look up cluster in database")
+	}
+
+	if count != 1 {
+		return nil, errors.New(err, "invalid cluster id or secret")
+	}
+
+	if err := t.db.SelectContext(ctx, `UPDATE license.clusters SET version=$1 AND auth_enabled=$2 AND last_heartbeat=NOW()`, req.Version, req.AuthEnabled); err != nil {
+		return nil, errors.Wrapf(err, "unable to update cluster in database")
+	}
+
+	record, ok := a.enterpriseTokenCache.Load().(*lc.LicenseRecord)
+	if !ok {
+		return nil, errors.New("unable to load current enterprise key")
+	}
+
+	return &lc.HeartbeatResponse{
+		License: record,
+	}, nil
 }
