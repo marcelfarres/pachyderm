@@ -45,6 +45,7 @@ func ActivateEnterprise(t testing.TB, c *client.APIClient) error {
 		client, err := c.License.AddCluster(context.Background(),
 			&license.AddClusterRequest{
 				Id:      "localhost",
+				Secret:  "localhost",
 				Address: "grpc://localhost:650",
 			})
 		if err != nil {

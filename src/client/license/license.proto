@@ -36,6 +36,7 @@ message DeactivateResponse{}
 message AddClusterRequest {
   string id = 1;
   string address = 2;
+  string secret = 3;
 }
 message AddClusterResponse {
   string secret = 1;

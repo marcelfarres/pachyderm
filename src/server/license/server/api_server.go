@@ -269,7 +269,10 @@ func (a *apiServer) AddCluster(ctx context.Context, req *lc.AddClusterRequest) (
 	}
 
 	// Generate the new shared secret for this pachd
-	secret := random.String(30)
+	secret := req.Secret
+	if secret == "" {
+		secret = random.String(30)
+	}
 
 	// Register the pachd in the database
 	if _, err := a.db.ExecContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, enabled, auth_enabled) VALUES ($1, $2, $3, $4, %5, $6)`, req.Id, req.Address, secret, version.String(versionResp), true, false); err != nil {
