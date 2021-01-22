@@ -46,7 +46,7 @@ func ActivateEnterprise(t testing.TB, c *client.APIClient) error {
 			&license.AddClusterRequest{
 				Id:      "localhost",
 				Secret:  "localhost",
-				Address: "grpc://localhost:650",
+				Address: "localhost:650",
 			})
 		if err != nil {
 			return err
@@ -56,7 +56,7 @@ func ActivateEnterprise(t testing.TB, c *client.APIClient) error {
 			&enterprise.ActivateRequest{
 				Id:            "localhost",
 				Secret:        client.Secret,
-				LicenseServer: "grpc://localhost:650",
+				LicenseServer: "localhost:650",
 			})
 		return err
 	}, backoff.NewTestingBackOff())

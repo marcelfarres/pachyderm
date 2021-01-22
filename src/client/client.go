@@ -705,6 +705,7 @@ func (c *APIClient) connect(timeout time.Duration, unaryInterceptors []grpc.Unar
 	c.ObjectAPIClient = pfs.NewObjectAPIClient(clientConn)
 	c.AuthAPIClient = auth.NewAPIClient(clientConn)
 	c.IdentityAPIClient = identity.NewAPIClient(clientConn)
+	c.License = license.NewAPIClient(clientConn)
 	c.Enterprise = enterprise.NewAPIClient(clientConn)
 	c.VersionAPIClient = versionpb.NewAPIClient(clientConn)
 	c.AdminAPIClient = admin.NewAPIClient(clientConn)
