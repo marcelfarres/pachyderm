@@ -45,6 +45,30 @@ func ActivateCmd() *cobra.Command {
 	return cmdutil.CreateAlias(activate, "enterprise activate")
 }
 
+// DeactivateCmd returns a cobra.Command to disable enterprise features and
+// clear the configuration of the enterprise service.
+func DeactivateCmd() *cobra.Command {
+	activate := &cobra.Command{
+		Use:   "{{alias}}",
+		Short: "Deactivate the enterprise features of Pachyderm",
+		Long:  "Deactivate the enterprise features of Pachyderm",
+		Run: cmdutil.RunFixedArgs(0, func(args []string) error {
+			c, err := client.NewOnUserMachine("user")
+			if err != nil {
+				return errors.Wrapf(err, "could not connect")
+			}
+			defer c.Close()
+			if _, err := c.Enterprise.Deactivate(c.Ctx(), &enterprise.DeactivateRequest{}); err != nil {
+				return err
+			}
+			fmt.Printf("Enterprise license deactivated.")
+			return nil
+		}),
+	}
+
+	return cmdutil.CreateAlias(activate, "enterprise deactivate")
+}
+
 // GetStateCmd returns a cobra.Command to activate the enterprise features of
 // Pachyderm within a Pachyderm cluster. All repos will go from
 // publicly-accessible to accessible only by the owner, who can subsequently add
@@ -93,6 +117,7 @@ func Cmds() []*cobra.Command {
 	commands = append(commands, cmdutil.CreateAlias(enterprise, "enterprise"))
 
 	commands = append(commands, ActivateCmd())
+	commands = append(commands, DeactivateCmd())
 	commands = append(commands, GetStateCmd())
 
 	return commands

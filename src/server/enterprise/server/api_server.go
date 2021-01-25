@@ -239,7 +239,6 @@ func (a *apiServer) Deactivate(ctx context.Context, req *ec.DeactivateRequest) (
 	}, backoff.RetryEvery(time.Second)); err != nil {
 		return nil, err
 	}
-	time.Sleep(time.Second) // give other pachd nodes time to observe the write
 
 	return &ec.DeactivateResponse{}, nil
 }

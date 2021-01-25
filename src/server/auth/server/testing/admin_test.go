@@ -690,7 +690,7 @@ func TestExpirationRepoOnlyAccessibleToAdmins(t *testing.T) {
 		})
 	rootClient.Enterprise.Activate(rootClient.Ctx(),
 		&enterprise.ActivateRequest{
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 			Id:            "localhost",
 			Secret:        "localhost",
 		})
@@ -773,7 +773,7 @@ func TestExpirationRepoOnlyAccessibleToAdmins(t *testing.T) {
 
 	rootClient.Enterprise.Activate(rootClient.Ctx(),
 		&enterprise.ActivateRequest{
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 			Id:            "localhost",
 			Secret:        "localhost",
 		})
@@ -883,7 +883,7 @@ func TestPipelinesRunAfterExpiration(t *testing.T) {
 		})
 	rootClient.Enterprise.Activate(rootClient.Ctx(),
 		&enterprise.ActivateRequest{
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 			Id:            "localhost",
 			Secret:        "localhost",
 		})
@@ -944,7 +944,7 @@ func TestGetSetScopeAndAclWithExpiredToken(t *testing.T) {
 		})
 	rootClient.Enterprise.Activate(rootClient.Ctx(),
 		&enterprise.ActivateRequest{
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 			Id:            "localhost",
 			Secret:        "localhost",
 		})

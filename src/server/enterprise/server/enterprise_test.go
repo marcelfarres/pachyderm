@@ -27,6 +27,8 @@ func TestGetState(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
+	testutil.DeleteAll(t)
+	defer testutil.DeleteAll(t)
 	client := testutil.GetPachClient(t)
 
 	testutil.ActivateEnterprise(t, client)
@@ -73,7 +75,7 @@ func TestGetState(t *testing.T) {
 		&enterprise.ActivateRequest{
 			Id:            "localhost",
 			Secret:        "localhost",
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 		})
 	require.NoError(t, err)
 
@@ -109,6 +111,8 @@ func TestGetActivationCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
+	testutil.DeleteAll(t)
+	defer testutil.DeleteAll(t)
 	client := testutil.GetPachClient(t)
 
 	testutil.ActivateEnterprise(t, client)
@@ -149,7 +153,7 @@ func TestGetActivationCode(t *testing.T) {
 		&enterprise.ActivateRequest{
 			Id:            "localhost",
 			Secret:        "localhost",
-			LicenseServer: "grpc://localhost:650",
+			LicenseServer: "localhost:650",
 		})
 	require.NoError(t, err)
 
@@ -193,6 +197,9 @@ func TestDeactivate(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
+
+	testutil.DeleteAll(t)
+	defer testutil.DeleteAll(t)
 	client := testutil.GetPachClient(t)
 
 	// Activate Pachyderm Enterprise and make sure the state is ACTIVE
@@ -234,6 +241,9 @@ func TestDoubleDeactivate(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration tests in short mode")
 	}
+
+	testutil.DeleteAll(t)
+	defer testutil.DeleteAll(t)
 	client := testutil.GetPachClient(t)
 
 	// Deactivate cluster and make sure its state is NONE (enterprise might be
