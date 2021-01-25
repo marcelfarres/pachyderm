@@ -34,9 +34,16 @@ message DeactivateRequest{}
 message DeactivateResponse{}
 
 message AddClusterRequest {
+  // id is the unique, immutable identifier for this cluster
   string id = 1;
-  string address = 2;
-  string secret = 3;
+  // name is a modifiable description of the cluster
+  string name = 2;
+  // address is the public GPRC address where the cluster can be reached
+  string address = 3;
+  // If set, secret specifies the shared secret this cluster will use
+  // to authenticate to the license server. Otherwise a secret will be
+  // generated and returned in the response. 
+  string secret = 4;
 }
 message AddClusterResponse {
   string secret = 1;
@@ -46,6 +53,30 @@ message DeleteClusterRequest {
   string id = 1;
 }
 message DeleteClusterResponse {}
+
+message ClusterStatus {
+  string name = 1;
+  string address = 2;
+  string version = 3;
+  bool auth_enabled = 4;
+  google.protobuf.Timestamp last_heartbeat = 5; 
+}
+
+message UpdateClusterRequest {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+}
+message UpdateClusterResponse{}
+
+message ListClustersRequest {}
+message ListClustersResponse {
+  // Clusters is a map of cluster ID -> ClusterStatus
+  map<string, ClusterStatus> clusters = 1;  
+}
+
+message DeleteAllRequest{}
+message DeleteAllResponse {}
 
 message HeartbeatRequest {
   string id = 1;
@@ -64,10 +95,17 @@ service API {
   rpc Activate(ActivateRequest) returns (ActivateResponse) {}
   rpc GetActivationCode(GetActivationCodeRequest) returns (GetActivationCodeResponse) {}
 
-  // Deactivate removes the current license and disables the license server
-  rpc Deactivate(DeactivateRequest) returns (DeactivateResponse) {}
+  // DeleteAll deactivates the server and removes all data.
+  rpc DeleteAll(DeleteAllRequest) returns (DeleteAllResponse) {}
 
+  // CRUD operations for the pachds registered with this server.
   rpc AddCluster(AddClusterRequest) returns (AddClusterResponse) {}
+  rpc DeleteCluster(DeleteClusterRequest) returns (DeleteClusterResponse) {}
+  rpc ListClusters(ListClustersRequest) returns (ListClustersResponse) {}
+  rpc UpdateCluster(UpdateClusterRequest) returns (UpdateClusterResponse) {}
+
+  // Heartbeat is the RPC registered pachds make to the license server
+  // to communicate their status and fetch updates.
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
 }
 

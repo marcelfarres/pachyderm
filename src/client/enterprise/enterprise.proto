@@ -79,13 +79,8 @@ service API {
   rpc GetState(GetStateRequest) returns (GetStateResponse) {}
   rpc GetActivationCode(GetActivationCodeRequest) returns (GetActivationCodeResponse) {}
 
-  // Deactivate is a testing API. It removes a cluster's enterprise activation
-  // token and sets its enterprise state to NONE (normally, once a cluster has
-  // been activated, the only reachable state is EXPIRED).
-  //
-  // NOTE: This endpoint also calls DeleteAll (and deletes all Pachyderm data in
-  // its cluster). This is to avoid dealing with invalid, intermediate states
-  // (e.g. auth is activated but enterprise state is NONE)
+  // Deactivate removes a cluster's enterprise activation
+  // token and sets its enterprise state to NONE.
   rpc Deactivate(DeactivateRequest) returns (DeactivateResponse) {}
 }
 

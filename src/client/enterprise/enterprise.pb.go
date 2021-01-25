@@ -706,13 +706,8 @@ type APIClient interface {
 	Activate(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*ActivateResponse, error)
 	GetState(ctx context.Context, in *GetStateRequest, opts ...grpc.CallOption) (*GetStateResponse, error)
 	GetActivationCode(ctx context.Context, in *GetActivationCodeRequest, opts ...grpc.CallOption) (*GetActivationCodeResponse, error)
-	// Deactivate is a testing API. It removes a cluster's enterprise activation
-	// token and sets its enterprise state to NONE (normally, once a cluster has
-	// been activated, the only reachable state is EXPIRED).
-	//
-	// NOTE: This endpoint also calls DeleteAll (and deletes all Pachyderm data in
-	// its cluster). This is to avoid dealing with invalid, intermediate states
-	// (e.g. auth is activated but enterprise state is NONE)
+	// Deactivate removes a cluster's enterprise activation
+	// token and sets its enterprise state to NONE.
 	Deactivate(ctx context.Context, in *DeactivateRequest, opts ...grpc.CallOption) (*DeactivateResponse, error)
 }
 
@@ -767,13 +762,8 @@ type APIServer interface {
 	Activate(context.Context, *ActivateRequest) (*ActivateResponse, error)
 	GetState(context.Context, *GetStateRequest) (*GetStateResponse, error)
 	GetActivationCode(context.Context, *GetActivationCodeRequest) (*GetActivationCodeResponse, error)
-	// Deactivate is a testing API. It removes a cluster's enterprise activation
-	// token and sets its enterprise state to NONE (normally, once a cluster has
-	// been activated, the only reachable state is EXPIRED).
-	//
-	// NOTE: This endpoint also calls DeleteAll (and deletes all Pachyderm data in
-	// its cluster). This is to avoid dealing with invalid, intermediate states
-	// (e.g. auth is activated but enterprise state is NONE)
+	// Deactivate removes a cluster's enterprise activation
+	// token and sets its enterprise state to NONE.
 	Deactivate(context.Context, *DeactivateRequest) (*DeactivateResponse, error)
 }
 

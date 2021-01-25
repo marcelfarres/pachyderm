@@ -317,9 +317,16 @@ func (m *DeactivateResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_DeactivateResponse proto.InternalMessageInfo
 
 type AddClusterRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Address              string   `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	Secret               string   `protobuf:"bytes,3,opt,name=secret,proto3" json:"secret,omitempty"`
+	// id is the unique, immutable identifier for this cluster
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// name is a modifiable description of the cluster
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// address is the public GPRC address where the cluster can be reached
+	Address string `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	// If set, secret specifies the shared secret this cluster will use
+	// to authenticate to the license server. Otherwise a secret will be
+	// generated and returned in the response.
+	Secret               string   `protobuf:"bytes,4,opt,name=secret,proto3" json:"secret,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -361,6 +368,13 @@ var xxx_messageInfo_AddClusterRequest proto.InternalMessageInfo
 func (m *AddClusterRequest) GetId() string {
 	if m != nil {
 		return m.Id
+	}
+	return ""
+}
+
+func (m *AddClusterRequest) GetName() string {
+	if m != nil {
+		return m.Name
 	}
 	return ""
 }
@@ -512,6 +526,352 @@ func (m *DeleteClusterResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DeleteClusterResponse proto.InternalMessageInfo
 
+type ClusterStatus struct {
+	Name                 string           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Address              string           `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Version              string           `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	AuthEnabled          bool             `protobuf:"varint,4,opt,name=auth_enabled,json=authEnabled,proto3" json:"auth_enabled,omitempty"`
+	LastHeartbeat        *types.Timestamp `protobuf:"bytes,5,opt,name=last_heartbeat,json=lastHeartbeat,proto3" json:"last_heartbeat,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *ClusterStatus) Reset()         { *m = ClusterStatus{} }
+func (m *ClusterStatus) String() string { return proto.CompactTextString(m) }
+func (*ClusterStatus) ProtoMessage()    {}
+func (*ClusterStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{10}
+}
+func (m *ClusterStatus) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ClusterStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ClusterStatus.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ClusterStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterStatus.Merge(m, src)
+}
+func (m *ClusterStatus) XXX_Size() int {
+	return m.Size()
+}
+func (m *ClusterStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClusterStatus proto.InternalMessageInfo
+
+func (m *ClusterStatus) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ClusterStatus) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *ClusterStatus) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+func (m *ClusterStatus) GetAuthEnabled() bool {
+	if m != nil {
+		return m.AuthEnabled
+	}
+	return false
+}
+
+func (m *ClusterStatus) GetLastHeartbeat() *types.Timestamp {
+	if m != nil {
+		return m.LastHeartbeat
+	}
+	return nil
+}
+
+type UpdateClusterRequest struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateClusterRequest) Reset()         { *m = UpdateClusterRequest{} }
+func (m *UpdateClusterRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateClusterRequest) ProtoMessage()    {}
+func (*UpdateClusterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{11}
+}
+func (m *UpdateClusterRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateClusterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateClusterRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateClusterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClusterRequest.Merge(m, src)
+}
+func (m *UpdateClusterRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateClusterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClusterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClusterRequest proto.InternalMessageInfo
+
+func (m *UpdateClusterRequest) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *UpdateClusterRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *UpdateClusterRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+type UpdateClusterResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateClusterResponse) Reset()         { *m = UpdateClusterResponse{} }
+func (m *UpdateClusterResponse) String() string { return proto.CompactTextString(m) }
+func (*UpdateClusterResponse) ProtoMessage()    {}
+func (*UpdateClusterResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{12}
+}
+func (m *UpdateClusterResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateClusterResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateClusterResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateClusterResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClusterResponse.Merge(m, src)
+}
+func (m *UpdateClusterResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateClusterResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClusterResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClusterResponse proto.InternalMessageInfo
+
+type ListClustersRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListClustersRequest) Reset()         { *m = ListClustersRequest{} }
+func (m *ListClustersRequest) String() string { return proto.CompactTextString(m) }
+func (*ListClustersRequest) ProtoMessage()    {}
+func (*ListClustersRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{13}
+}
+func (m *ListClustersRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListClustersRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListClustersRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListClustersRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListClustersRequest.Merge(m, src)
+}
+func (m *ListClustersRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListClustersRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListClustersRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListClustersRequest proto.InternalMessageInfo
+
+type ListClustersResponse struct {
+	// Clusters is a map of cluster ID -> ClusterStatus
+	Clusters             map[string]*ClusterStatus `protobuf:"bytes,1,rep,name=clusters,proto3" json:"clusters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *ListClustersResponse) Reset()         { *m = ListClustersResponse{} }
+func (m *ListClustersResponse) String() string { return proto.CompactTextString(m) }
+func (*ListClustersResponse) ProtoMessage()    {}
+func (*ListClustersResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{14}
+}
+func (m *ListClustersResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListClustersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListClustersResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListClustersResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListClustersResponse.Merge(m, src)
+}
+func (m *ListClustersResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListClustersResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListClustersResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListClustersResponse proto.InternalMessageInfo
+
+func (m *ListClustersResponse) GetClusters() map[string]*ClusterStatus {
+	if m != nil {
+		return m.Clusters
+	}
+	return nil
+}
+
+type DeleteAllRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteAllRequest) Reset()         { *m = DeleteAllRequest{} }
+func (m *DeleteAllRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteAllRequest) ProtoMessage()    {}
+func (*DeleteAllRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{15}
+}
+func (m *DeleteAllRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteAllRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteAllRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteAllRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteAllRequest.Merge(m, src)
+}
+func (m *DeleteAllRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteAllRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteAllRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteAllRequest proto.InternalMessageInfo
+
+type DeleteAllResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteAllResponse) Reset()         { *m = DeleteAllResponse{} }
+func (m *DeleteAllResponse) String() string { return proto.CompactTextString(m) }
+func (*DeleteAllResponse) ProtoMessage()    {}
+func (*DeleteAllResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6eaaecd906a40739, []int{16}
+}
+func (m *DeleteAllResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteAllResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteAllResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteAllResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteAllResponse.Merge(m, src)
+}
+func (m *DeleteAllResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteAllResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteAllResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteAllResponse proto.InternalMessageInfo
+
 type HeartbeatRequest struct {
 	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Secret               string   `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`
@@ -526,7 +886,7 @@ func (m *HeartbeatRequest) Reset()         { *m = HeartbeatRequest{} }
 func (m *HeartbeatRequest) String() string { return proto.CompactTextString(m) }
 func (*HeartbeatRequest) ProtoMessage()    {}
 func (*HeartbeatRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6eaaecd906a40739, []int{10}
+	return fileDescriptor_6eaaecd906a40739, []int{17}
 }
 func (m *HeartbeatRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -594,7 +954,7 @@ func (m *HeartbeatResponse) Reset()         { *m = HeartbeatResponse{} }
 func (m *HeartbeatResponse) String() string { return proto.CompactTextString(m) }
 func (*HeartbeatResponse) ProtoMessage()    {}
 func (*HeartbeatResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6eaaecd906a40739, []int{11}
+	return fileDescriptor_6eaaecd906a40739, []int{18}
 }
 func (m *HeartbeatResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -641,6 +1001,14 @@ func init() {
 	proto.RegisterType((*AddClusterResponse)(nil), "license.AddClusterResponse")
 	proto.RegisterType((*DeleteClusterRequest)(nil), "license.DeleteClusterRequest")
 	proto.RegisterType((*DeleteClusterResponse)(nil), "license.DeleteClusterResponse")
+	proto.RegisterType((*ClusterStatus)(nil), "license.ClusterStatus")
+	proto.RegisterType((*UpdateClusterRequest)(nil), "license.UpdateClusterRequest")
+	proto.RegisterType((*UpdateClusterResponse)(nil), "license.UpdateClusterResponse")
+	proto.RegisterType((*ListClustersRequest)(nil), "license.ListClustersRequest")
+	proto.RegisterType((*ListClustersResponse)(nil), "license.ListClustersResponse")
+	proto.RegisterMapType((map[string]*ClusterStatus)(nil), "license.ListClustersResponse.ClustersEntry")
+	proto.RegisterType((*DeleteAllRequest)(nil), "license.DeleteAllRequest")
+	proto.RegisterType((*DeleteAllResponse)(nil), "license.DeleteAllResponse")
 	proto.RegisterType((*HeartbeatRequest)(nil), "license.HeartbeatRequest")
 	proto.RegisterType((*HeartbeatResponse)(nil), "license.HeartbeatResponse")
 }
@@ -648,44 +1016,57 @@ func init() {
 func init() { proto.RegisterFile("client/license/license.proto", fileDescriptor_6eaaecd906a40739) }
 
 var fileDescriptor_6eaaecd906a40739 = []byte{
-	// 577 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x54, 0xcf, 0x6e, 0xd3, 0x4e,
-	0x10, 0xae, 0xdd, 0xfe, 0xfa, 0x67, 0xfa, 0x53, 0xdb, 0x2c, 0x2d, 0xb8, 0x06, 0x95, 0x74, 0x0f,
-	0x34, 0x48, 0xc8, 0x11, 0x29, 0x57, 0x84, 0x42, 0x83, 0xda, 0x4a, 0x1c, 0x90, 0x29, 0x17, 0x84,
-	0x54, 0x39, 0xf6, 0x24, 0x59, 0xe1, 0x78, 0xcd, 0xee, 0xa6, 0xc0, 0x9b, 0xf0, 0x48, 0x1c, 0x79,
-	0x04, 0x94, 0x07, 0x41, 0x28, 0xf1, 0x6e, 0xbc, 0x49, 0xdc, 0x72, 0xb2, 0x67, 0xe6, 0xdb, 0x99,
-	0x6f, 0x66, 0xbe, 0x5d, 0x78, 0x14, 0xa7, 0x0c, 0x33, 0xd5, 0x4c, 0x59, 0x8c, 0x99, 0x44, 0xf3,
-	0x0d, 0x72, 0xc1, 0x15, 0x27, 0x1b, 0xda, 0xf4, 0x1f, 0xf7, 0x39, 0xef, 0xa7, 0xd8, 0x9c, 0xba,
-	0xbb, 0xa3, 0x5e, 0x53, 0xb1, 0x21, 0x4a, 0x15, 0x0d, 0xf3, 0x02, 0xe9, 0x53, 0x9d, 0x07, 0x33,
-	0x85, 0x22, 0x17, 0x4c, 0xa2, 0xf5, 0x5b, 0x60, 0x68, 0x0e, 0xbb, 0xed, 0x58, 0xb1, 0x9b, 0x48,
-	0x61, 0x88, 0x5f, 0x46, 0x28, 0x15, 0x39, 0x81, 0xdd, 0xa8, 0x70, 0x31, 0x9e, 0x5d, 0xc7, 0x3c,
-	0x41, 0xcf, 0xa9, 0x3b, 0x8d, 0xad, 0x70, 0xa7, 0x74, 0x9f, 0xf1, 0x04, 0xc9, 0x0b, 0xd8, 0xc0,
-	0x6f, 0x39, 0x13, 0x28, 0x3d, 0xb7, 0xee, 0x34, 0xb6, 0x5b, 0x7e, 0x50, 0x50, 0x0a, 0x0c, 0xa5,
-	0xe0, 0xca, 0x50, 0x0a, 0x0d, 0x94, 0xbe, 0x84, 0xbd, 0xb2, 0xa2, 0xcc, 0x79, 0x26, 0x91, 0x3c,
-	0x85, 0x35, 0x96, 0xf5, 0xf8, 0xb4, 0xce, 0x76, 0xeb, 0x20, 0xb0, 0x68, 0x5e, 0xf1, 0xcf, 0x98,
-	0x5d, 0x66, 0x3d, 0x1e, 0x4e, 0x21, 0xd4, 0x07, 0xef, 0x1c, 0x55, 0x7b, 0x8e, 0x89, 0x66, 0x4e,
-	0x7f, 0x38, 0x70, 0x58, 0x11, 0xd4, 0x45, 0x4e, 0xe0, 0x3f, 0xa9, 0x22, 0x55, 0x74, 0xb3, 0xd3,
-	0xaa, 0xd9, 0x55, 0xde, 0x4f, 0x02, 0x61, 0x11, 0x9f, 0xb1, 0x71, 0xff, 0xc9, 0xa6, 0x6a, 0x56,
-	0xab, 0x55, 0xb3, 0xa2, 0xf7, 0xa0, 0xd6, 0xc1, 0x68, 0x7e, 0xd2, 0x74, 0x1f, 0x88, 0xed, 0x2c,
-	0x78, 0xd2, 0x0f, 0x50, 0x6b, 0x27, 0xc9, 0x59, 0x3a, 0x92, 0x0a, 0x85, 0x59, 0xca, 0x0e, 0xb8,
-	0x2c, 0xd1, 0x7b, 0x70, 0x59, 0x42, 0x3c, 0xd8, 0x88, 0x92, 0x44, 0xa0, 0x2c, 0x66, 0xbf, 0x15,
-	0x1a, 0x93, 0xdc, 0x87, 0x75, 0x89, 0xb1, 0x40, 0xa5, 0x99, 0x68, 0x8b, 0x3e, 0x03, 0x62, 0xa7,
-	0xd5, 0x43, 0x29, 0xd1, 0xce, 0x1c, 0xfa, 0x09, 0xec, 0x77, 0x30, 0x45, 0x85, 0x77, 0xf3, 0xa0,
-	0x0f, 0xe0, 0x60, 0x01, 0xa7, 0xbb, 0xf8, 0x0a, 0x7b, 0x17, 0x18, 0x09, 0xd5, 0xc5, 0x48, 0xdd,
-	0xd6, 0x44, 0x59, 0xdc, 0xb5, 0x8b, 0x4f, 0x9a, 0xbb, 0x41, 0x21, 0x19, 0xcf, 0x74, 0x0f, 0xc6,
-	0x24, 0xc7, 0xf0, 0x7f, 0x34, 0x52, 0x83, 0x6b, 0xcc, 0xa2, 0x6e, 0x8a, 0x89, 0xb7, 0x56, 0x77,
-	0x1a, 0x9b, 0xe1, 0xf6, 0xc4, 0xf7, 0xa6, 0x70, 0xd1, 0x0b, 0xa8, 0x59, 0x85, 0x75, 0x9b, 0xa7,
-	0x60, 0xae, 0x8d, 0xd6, 0xd8, 0xa1, 0xbd, 0xd5, 0xb7, 0x45, 0x28, 0xc4, 0x98, 0x8b, 0x24, 0x34,
-	0xc8, 0xd6, 0x1f, 0x17, 0x56, 0xdb, 0xef, 0x2e, 0x49, 0x1b, 0x36, 0x8d, 0x62, 0x89, 0x17, 0x98,
-	0xdb, 0xb8, 0x70, 0x6d, 0xfc, 0xc3, 0x8a, 0x88, 0x9e, 0xc5, 0x0a, 0xf9, 0x04, 0xb5, 0x25, 0x61,
-	0x92, 0xe3, 0xd9, 0x89, 0xdb, 0x14, 0xed, 0xd3, 0xbb, 0x20, 0xb3, 0xec, 0xe7, 0x00, 0xa5, 0x8e,
-	0x88, 0x3f, 0x3b, 0xb3, 0xa4, 0x38, 0xff, 0x61, 0x65, 0xcc, 0x4e, 0x54, 0x6a, 0xc4, 0x4a, 0xb4,
-	0xa4, 0x47, 0x2b, 0xd1, 0xb2, 0xa8, 0xe8, 0x0a, 0xe9, 0xc0, 0xd6, 0x6c, 0x09, 0xa4, 0x9c, 0xcc,
-	0xa2, 0x22, 0x7c, 0xbf, 0x2a, 0x64, 0xb2, 0xbc, 0x7e, 0xf5, 0x73, 0x7c, 0xe4, 0xfc, 0x1a, 0x1f,
-	0x39, 0xbf, 0xc7, 0x47, 0xce, 0xc7, 0xe7, 0x7d, 0xa6, 0x06, 0xa3, 0x6e, 0x10, 0xf3, 0x61, 0x33,
-	0x8f, 0xe2, 0xc1, 0xf7, 0x04, 0x85, 0xfd, 0x27, 0x45, 0xdc, 0x9c, 0x7f, 0x39, 0xbb, 0xeb, 0xd3,
-	0x87, 0xe8, 0xf4, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x9a, 0x03, 0x95, 0xc9, 0x52, 0x05, 0x00,
-	0x00,
+	// 793 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xc1, 0x4e, 0xdb, 0x4c,
+	0x10, 0xc6, 0x49, 0x20, 0x30, 0x81, 0x90, 0x2c, 0x81, 0xdf, 0xf8, 0x87, 0xfc, 0xe0, 0xc3, 0x0f,
+	0x55, 0x91, 0xa3, 0x86, 0x1e, 0xaa, 0x4a, 0x55, 0x95, 0x02, 0x02, 0x24, 0x2a, 0x21, 0x43, 0x2f,
+	0x55, 0x25, 0xe4, 0xd8, 0x03, 0xb1, 0x70, 0x6c, 0xd7, 0xbb, 0xa1, 0xe5, 0x4d, 0xfa, 0x20, 0xbd,
+	0xf6, 0xde, 0x63, 0x1f, 0xa1, 0xe2, 0x01, 0xfa, 0x0c, 0x55, 0xec, 0xdd, 0x8d, 0x1d, 0x1c, 0x50,
+	0xd5, 0x53, 0xbc, 0x33, 0xb3, 0x33, 0xdf, 0x7c, 0x33, 0xfb, 0x29, 0xb0, 0x66, 0x7b, 0x2e, 0xfa,
+	0xac, 0xe5, 0xb9, 0x36, 0xfa, 0x14, 0xc5, 0xaf, 0x11, 0x46, 0x01, 0x0b, 0x48, 0x99, 0x1f, 0xb5,
+	0xff, 0xae, 0x82, 0xe0, 0xca, 0xc3, 0x56, 0x6c, 0xee, 0x0e, 0x2e, 0x5b, 0xcc, 0xed, 0x23, 0x65,
+	0x56, 0x3f, 0x4c, 0x22, 0x35, 0x9d, 0xe7, 0x41, 0x9f, 0x61, 0x14, 0x46, 0x2e, 0xc5, 0xd4, 0x67,
+	0x12, 0xa3, 0x87, 0xb0, 0xd8, 0xb1, 0x99, 0x7b, 0x63, 0x31, 0x34, 0xf1, 0xe3, 0x00, 0x29, 0x23,
+	0x5b, 0xb0, 0x68, 0x25, 0x26, 0x37, 0xf0, 0x2f, 0xec, 0xc0, 0x41, 0x55, 0xd9, 0x50, 0xb6, 0xe7,
+	0xcc, 0xea, 0xc8, 0xbc, 0x17, 0x38, 0x48, 0x9e, 0x43, 0x19, 0x3f, 0x87, 0x6e, 0x84, 0x54, 0x2d,
+	0x6c, 0x28, 0xdb, 0x95, 0xb6, 0x66, 0x24, 0x90, 0x0c, 0x01, 0xc9, 0x38, 0x17, 0x90, 0x4c, 0x11,
+	0xaa, 0xbf, 0x82, 0xda, 0xa8, 0x22, 0x0d, 0x03, 0x9f, 0x22, 0x79, 0x02, 0x25, 0xd7, 0xbf, 0x0c,
+	0xe2, 0x3a, 0x95, 0xf6, 0xb2, 0x91, 0x82, 0x79, 0x1e, 0x5c, 0xa3, 0x7f, 0xec, 0x5f, 0x06, 0x66,
+	0x1c, 0xa2, 0x6b, 0xa0, 0x1e, 0x22, 0xeb, 0x64, 0x90, 0x70, 0xe4, 0xfa, 0x17, 0x05, 0x56, 0x73,
+	0x9c, 0xbc, 0xc8, 0x16, 0x4c, 0x53, 0x66, 0xb1, 0xa4, 0x9b, 0x6a, 0xbb, 0x9e, 0xae, 0x72, 0x36,
+	0x74, 0x98, 0x89, 0x5f, 0xa2, 0x29, 0x3c, 0x8a, 0x26, 0x8f, 0xab, 0x62, 0x1e, 0x57, 0xfa, 0x12,
+	0xd4, 0xf7, 0xd1, 0xca, 0x32, 0xad, 0x37, 0x80, 0xa4, 0x8d, 0x09, 0x4e, 0xdd, 0x85, 0x7a, 0xc7,
+	0x71, 0xf6, 0xbc, 0x01, 0x65, 0x18, 0x89, 0xa1, 0x54, 0xa1, 0xe0, 0x3a, 0x7c, 0x0e, 0x05, 0xd7,
+	0x21, 0x04, 0x4a, 0xbe, 0xd5, 0xc7, 0x18, 0xe3, 0x9c, 0x19, 0x7f, 0x13, 0x15, 0xca, 0x96, 0xe3,
+	0x44, 0x48, 0x29, 0x07, 0x21, 0x8e, 0x64, 0x05, 0x66, 0x28, 0xda, 0x11, 0x32, 0xb5, 0x14, 0x3b,
+	0xf8, 0x49, 0xdf, 0x01, 0x92, 0x2e, 0xc5, 0x89, 0x1a, 0x45, 0x2b, 0x99, 0xe8, 0xff, 0xa1, 0xb1,
+	0x8f, 0x1e, 0x32, 0x7c, 0x18, 0x9b, 0xfe, 0x0f, 0x2c, 0x8f, 0xc5, 0xf1, 0xce, 0xbe, 0x29, 0xb0,
+	0xc0, 0x6d, 0x43, 0xc2, 0x07, 0x54, 0xb6, 0xa1, 0xe4, 0xb7, 0x51, 0xc8, 0xb6, 0xa1, 0x42, 0xf9,
+	0x06, 0x23, 0xea, 0x06, 0xbe, 0x68, 0x90, 0x1f, 0xc9, 0x26, 0xcc, 0x5b, 0x03, 0xd6, 0xbb, 0x40,
+	0xdf, 0xea, 0x7a, 0xe8, 0xc4, 0x6d, 0xce, 0x9a, 0x95, 0xa1, 0xed, 0x20, 0x31, 0x91, 0x0e, 0x54,
+	0x3d, 0x8b, 0xb2, 0x8b, 0x1e, 0x5a, 0x11, 0xeb, 0xa2, 0xc5, 0xd4, 0xe9, 0x47, 0x97, 0x76, 0x61,
+	0x78, 0xe3, 0x48, 0x5c, 0xd0, 0xcf, 0xa1, 0xf1, 0x2e, 0x74, 0xac, 0xc7, 0x08, 0xf8, 0xb3, 0xe1,
+	0x0c, 0xe9, 0x1a, 0xcb, 0xca, 0xe9, 0x5a, 0x86, 0xa5, 0x13, 0x97, 0x32, 0x6e, 0xa6, 0x62, 0x6b,
+	0xbe, 0x2a, 0xd0, 0xc8, 0xda, 0xf9, 0xdc, 0x0e, 0x61, 0xd6, 0xe6, 0x36, 0x55, 0xd9, 0x28, 0x6e,
+	0x57, 0xda, 0x4f, 0x0d, 0xa1, 0x1d, 0x79, 0x17, 0x0c, 0x61, 0x38, 0xf0, 0x59, 0x74, 0x6b, 0xca,
+	0xcb, 0xda, 0x99, 0x1c, 0x53, 0xe2, 0x22, 0x35, 0x28, 0x5e, 0xe3, 0x2d, 0xef, 0x70, 0xf8, 0x49,
+	0x76, 0x60, 0xfa, 0xc6, 0xf2, 0x06, 0xc8, 0x1f, 0xc9, 0x8a, 0x2c, 0x94, 0x99, 0xaf, 0x99, 0x04,
+	0xbd, 0x2c, 0xbc, 0x50, 0x74, 0x02, 0xb5, 0x64, 0x2b, 0x3a, 0x9e, 0x27, 0x5a, 0x89, 0x5f, 0x85,
+	0xb4, 0xf1, 0xb6, 0x3f, 0x41, 0x4d, 0x52, 0x3e, 0x89, 0xe1, 0xd1, 0x8a, 0x16, 0xd2, 0x2b, 0xfa,
+	0x57, 0x1b, 0xa2, 0x1f, 0x41, 0x3d, 0x55, 0x98, 0x93, 0xba, 0x0b, 0x42, 0x70, 0xb9, 0x3a, 0xad,
+	0xa6, 0xf5, 0xe0, 0x24, 0x71, 0x99, 0x68, 0x07, 0x91, 0x63, 0x8a, 0xc8, 0xf6, 0xaf, 0x12, 0x14,
+	0x3b, 0xa7, 0xc7, 0xa4, 0x03, 0xb3, 0x42, 0xeb, 0x88, 0x2a, 0x29, 0x1a, 0x13, 0x5c, 0x6d, 0x35,
+	0xc7, 0xc3, 0xb9, 0x98, 0x22, 0x1f, 0xa0, 0x7e, 0x4f, 0xd2, 0xc8, 0xa6, 0xbc, 0x31, 0x49, 0x0b,
+	0x35, 0xfd, 0xa1, 0x10, 0x99, 0x7d, 0x1f, 0xe6, 0xe4, 0x00, 0xc8, 0x08, 0xc7, 0xf8, 0xa0, 0x34,
+	0x2d, 0xcf, 0x25, 0xb3, 0x1c, 0x02, 0x8c, 0x64, 0x84, 0x8c, 0x62, 0xef, 0xc9, 0x98, 0xf6, 0x6f,
+	0xae, 0x4f, 0x26, 0x3a, 0x85, 0x85, 0x8c, 0x72, 0x90, 0xf5, 0xb1, 0xba, 0x63, 0xe9, 0x9a, 0x93,
+	0xdc, 0x32, 0xe3, 0x5b, 0x98, 0x4f, 0xaf, 0x3e, 0x59, 0x9b, 0xf0, 0x22, 0x92, 0x7c, 0xeb, 0x0f,
+	0xbe, 0x97, 0x04, 0x60, 0xe6, 0xad, 0xa6, 0x00, 0xe6, 0x29, 0x43, 0x0a, 0x60, 0xfe, 0x13, 0x8f,
+	0x27, 0x20, 0x97, 0x2e, 0x35, 0x81, 0xf1, 0x17, 0x90, 0x9a, 0xc0, 0xbd, 0x1d, 0xd5, 0xa7, 0xde,
+	0xbc, 0xfe, 0x7e, 0xd7, 0x54, 0x7e, 0xdc, 0x35, 0x95, 0x9f, 0x77, 0x4d, 0xe5, 0xfd, 0xb3, 0x2b,
+	0x97, 0xf5, 0x06, 0x5d, 0xc3, 0x0e, 0xfa, 0xad, 0xd0, 0xb2, 0x7b, 0xb7, 0x0e, 0x46, 0xe9, 0x2f,
+	0x1a, 0xd9, 0xad, 0xec, 0x7f, 0x8c, 0xee, 0x4c, 0xac, 0x7e, 0xbb, 0xbf, 0x03, 0x00, 0x00, 0xff,
+	0xff, 0x7d, 0x03, 0xcc, 0xda, 0x7c, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -704,15 +1085,15 @@ type APIClient interface {
 	// code to serve.
 	Activate(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*ActivateResponse, error)
 	GetActivationCode(ctx context.Context, in *GetActivationCodeRequest, opts ...grpc.CallOption) (*GetActivationCodeResponse, error)
-	// Deactivate is a testing API. It removes a cluster's enterprise activation
-	// token and sets its enterprise state to NONE (normally, once a cluster has
-	// been activated, the only reachable state is EXPIRED).
-	//
-	// NOTE: This endpoint also calls DeleteAll (and deletes all Pachyderm data in
-	// its cluster). This is to avoid dealing with invalid, intermediate states
-	// (e.g. auth is activated but enterprise state is NONE)
-	Deactivate(ctx context.Context, in *DeactivateRequest, opts ...grpc.CallOption) (*DeactivateResponse, error)
+	// DeleteAll deactivates the server and removes all data.
+	DeleteAll(ctx context.Context, in *DeleteAllRequest, opts ...grpc.CallOption) (*DeleteAllResponse, error)
+	// CRUD operations for the pachds registered with this server.
 	AddCluster(ctx context.Context, in *AddClusterRequest, opts ...grpc.CallOption) (*AddClusterResponse, error)
+	DeleteCluster(ctx context.Context, in *DeleteClusterRequest, opts ...grpc.CallOption) (*DeleteClusterResponse, error)
+	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
+	UpdateCluster(ctx context.Context, in *UpdateClusterRequest, opts ...grpc.CallOption) (*UpdateClusterResponse, error)
+	// Heartbeat is the RPC registered pachds make to the license server
+	// to communicate their status and fetch updates.
 	Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error)
 }
 
@@ -742,9 +1123,9 @@ func (c *aPIClient) GetActivationCode(ctx context.Context, in *GetActivationCode
 	return out, nil
 }
 
-func (c *aPIClient) Deactivate(ctx context.Context, in *DeactivateRequest, opts ...grpc.CallOption) (*DeactivateResponse, error) {
-	out := new(DeactivateResponse)
-	err := c.cc.Invoke(ctx, "/license.API/Deactivate", in, out, opts...)
+func (c *aPIClient) DeleteAll(ctx context.Context, in *DeleteAllRequest, opts ...grpc.CallOption) (*DeleteAllResponse, error) {
+	out := new(DeleteAllResponse)
+	err := c.cc.Invoke(ctx, "/license.API/DeleteAll", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -754,6 +1135,33 @@ func (c *aPIClient) Deactivate(ctx context.Context, in *DeactivateRequest, opts 
 func (c *aPIClient) AddCluster(ctx context.Context, in *AddClusterRequest, opts ...grpc.CallOption) (*AddClusterResponse, error) {
 	out := new(AddClusterResponse)
 	err := c.cc.Invoke(ctx, "/license.API/AddCluster", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aPIClient) DeleteCluster(ctx context.Context, in *DeleteClusterRequest, opts ...grpc.CallOption) (*DeleteClusterResponse, error) {
+	out := new(DeleteClusterResponse)
+	err := c.cc.Invoke(ctx, "/license.API/DeleteCluster", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aPIClient) ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error) {
+	out := new(ListClustersResponse)
+	err := c.cc.Invoke(ctx, "/license.API/ListClusters", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aPIClient) UpdateCluster(ctx context.Context, in *UpdateClusterRequest, opts ...grpc.CallOption) (*UpdateClusterResponse, error) {
+	out := new(UpdateClusterResponse)
+	err := c.cc.Invoke(ctx, "/license.API/UpdateCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -775,15 +1183,15 @@ type APIServer interface {
 	// code to serve.
 	Activate(context.Context, *ActivateRequest) (*ActivateResponse, error)
 	GetActivationCode(context.Context, *GetActivationCodeRequest) (*GetActivationCodeResponse, error)
-	// Deactivate is a testing API. It removes a cluster's enterprise activation
-	// token and sets its enterprise state to NONE (normally, once a cluster has
-	// been activated, the only reachable state is EXPIRED).
-	//
-	// NOTE: This endpoint also calls DeleteAll (and deletes all Pachyderm data in
-	// its cluster). This is to avoid dealing with invalid, intermediate states
-	// (e.g. auth is activated but enterprise state is NONE)
-	Deactivate(context.Context, *DeactivateRequest) (*DeactivateResponse, error)
+	// DeleteAll deactivates the server and removes all data.
+	DeleteAll(context.Context, *DeleteAllRequest) (*DeleteAllResponse, error)
+	// CRUD operations for the pachds registered with this server.
 	AddCluster(context.Context, *AddClusterRequest) (*AddClusterResponse, error)
+	DeleteCluster(context.Context, *DeleteClusterRequest) (*DeleteClusterResponse, error)
+	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
+	UpdateCluster(context.Context, *UpdateClusterRequest) (*UpdateClusterResponse, error)
+	// Heartbeat is the RPC registered pachds make to the license server
+	// to communicate their status and fetch updates.
 	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error)
 }
 
@@ -797,11 +1205,20 @@ func (*UnimplementedAPIServer) Activate(ctx context.Context, req *ActivateReques
 func (*UnimplementedAPIServer) GetActivationCode(ctx context.Context, req *GetActivationCodeRequest) (*GetActivationCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActivationCode not implemented")
 }
-func (*UnimplementedAPIServer) Deactivate(ctx context.Context, req *DeactivateRequest) (*DeactivateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Deactivate not implemented")
+func (*UnimplementedAPIServer) DeleteAll(ctx context.Context, req *DeleteAllRequest) (*DeleteAllResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAll not implemented")
 }
 func (*UnimplementedAPIServer) AddCluster(ctx context.Context, req *AddClusterRequest) (*AddClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCluster not implemented")
+}
+func (*UnimplementedAPIServer) DeleteCluster(ctx context.Context, req *DeleteClusterRequest) (*DeleteClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCluster not implemented")
+}
+func (*UnimplementedAPIServer) ListClusters(ctx context.Context, req *ListClustersRequest) (*ListClustersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListClusters not implemented")
+}
+func (*UnimplementedAPIServer) UpdateCluster(ctx context.Context, req *UpdateClusterRequest) (*UpdateClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCluster not implemented")
 }
 func (*UnimplementedAPIServer) Heartbeat(ctx context.Context, req *HeartbeatRequest) (*HeartbeatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
@@ -847,20 +1264,20 @@ func _API_GetActivationCode_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _API_Deactivate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeactivateRequest)
+func _API_DeleteAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAllRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).Deactivate(ctx, in)
+		return srv.(APIServer).DeleteAll(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/license.API/Deactivate",
+		FullMethod: "/license.API/DeleteAll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).Deactivate(ctx, req.(*DeactivateRequest))
+		return srv.(APIServer).DeleteAll(ctx, req.(*DeleteAllRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -879,6 +1296,60 @@ func _API_AddCluster_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(APIServer).AddCluster(ctx, req.(*AddClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _API_DeleteCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).DeleteCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/license.API/DeleteCluster",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).DeleteCluster(ctx, req.(*DeleteClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _API_ListClusters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListClustersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).ListClusters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/license.API/ListClusters",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).ListClusters(ctx, req.(*ListClustersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _API_UpdateCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).UpdateCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/license.API/UpdateCluster",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).UpdateCluster(ctx, req.(*UpdateClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -914,12 +1385,24 @@ var _API_serviceDesc = grpc.ServiceDesc{
 			Handler:    _API_GetActivationCode_Handler,
 		},
 		{
-			MethodName: "Deactivate",
-			Handler:    _API_Deactivate_Handler,
+			MethodName: "DeleteAll",
+			Handler:    _API_DeleteAll_Handler,
 		},
 		{
 			MethodName: "AddCluster",
 			Handler:    _API_AddCluster_Handler,
+		},
+		{
+			MethodName: "DeleteCluster",
+			Handler:    _API_DeleteCluster_Handler,
+		},
+		{
+			MethodName: "ListClusters",
+			Handler:    _API_ListClusters_Handler,
+		},
+		{
+			MethodName: "UpdateCluster",
+			Handler:    _API_UpdateCluster_Handler,
 		},
 		{
 			MethodName: "Heartbeat",
@@ -1176,12 +1659,19 @@ func (m *AddClusterRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Secret)
 		i = encodeVarintLicense(dAtA, i, uint64(len(m.Secret)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 	}
 	if len(m.Address) > 0 {
 		i -= len(m.Address)
 		copy(dAtA[i:], m.Address)
 		i = encodeVarintLicense(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Name)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -1279,6 +1769,285 @@ func (m *DeleteClusterResponse) MarshalTo(dAtA []byte) (int, error) {
 }
 
 func (m *DeleteClusterResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ClusterStatus) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ClusterStatus) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ClusterStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.LastHeartbeat != nil {
+		{
+			size, err := m.LastHeartbeat.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintLicense(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.AuthEnabled {
+		i--
+		if m.AuthEnabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Version) > 0 {
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Version)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateClusterRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateClusterRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateClusterRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintLicense(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateClusterResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateClusterResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateClusterResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListClustersRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListClustersRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListClustersRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListClustersResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListClustersResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListClustersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Clusters) > 0 {
+		for k := range m.Clusters {
+			v := m.Clusters[k]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintLicense(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintLicense(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintLicense(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteAllRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteAllRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteAllRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteAllResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteAllResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteAllResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1503,6 +2272,10 @@ func (m *AddClusterRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovLicense(uint64(l))
 	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
 	l = len(m.Address)
 	if l > 0 {
 		n += 1 + l + sovLicense(uint64(l))
@@ -1550,6 +2323,134 @@ func (m *DeleteClusterRequest) Size() (n int) {
 }
 
 func (m *DeleteClusterResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *ClusterStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	l = len(m.Version)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	if m.AuthEnabled {
+		n += 2
+	}
+	if m.LastHeartbeat != nil {
+		l = m.LastHeartbeat.Size()
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *UpdateClusterRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovLicense(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *UpdateClusterResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *ListClustersRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *ListClustersResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Clusters) > 0 {
+		for k, v := range m.Clusters {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovLicense(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovLicense(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovLicense(uint64(mapEntrySize))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *DeleteAllRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *DeleteAllResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2170,6 +3071,38 @@ func (m *AddClusterRequest) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
 			}
 			var stringLen uint64
@@ -2200,7 +3133,7 @@ func (m *AddClusterRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.Address = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Secret", wireType)
 			}
@@ -2447,6 +3380,740 @@ func (m *DeleteClusterResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: DeleteClusterResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ClusterStatus) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ClusterStatus: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ClusterStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Version = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AuthEnabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.AuthEnabled = bool(v != 0)
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastHeartbeat", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastHeartbeat == nil {
+				m.LastHeartbeat = &types.Timestamp{}
+			}
+			if err := m.LastHeartbeat.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateClusterRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateClusterRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateClusterRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateClusterResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateClusterResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateClusterResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListClustersRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListClustersRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListClustersRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListClustersResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListClustersResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListClustersResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Clusters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLicense
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthLicense
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Clusters == nil {
+				m.Clusters = make(map[string]*ClusterStatus)
+			}
+			var mapkey string
+			var mapvalue *ClusterStatus
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowLicense
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowLicense
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthLicense
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthLicense
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowLicense
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthLicense
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthLicense
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &ClusterStatus{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipLicense(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
+						return ErrInvalidLengthLicense
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Clusters[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteAllRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteAllRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteAllRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipLicense(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthLicense
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteAllResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowLicense
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteAllResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteAllResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
