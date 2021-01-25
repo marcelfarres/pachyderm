@@ -207,17 +207,10 @@ func (a *apiServer) getEnterpriseRecord() (*ec.GetActivationCodeResponse, error)
 }
 
 // Deactivate deletes the current cluster's enterprise token, and puts the
-// cluster in the "NONE" enterprise state. It also deletes all data in the
-// cluster, to avoid invalid cluster states. This call only makes sense for
-// testing
+// cluster in the "NONE" enterprise state.
 func (a *apiServer) Deactivate(ctx context.Context, req *ec.DeactivateRequest) (resp *ec.DeactivateResponse, retErr error) {
 	a.LogReq(req)
 	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
-
-	pachClient := a.env.GetPachClient(ctx)
-	if err := pachClient.DeleteAll(); err != nil {
-		return nil, errors.Wrapf(err, "could not delete all pachyderm data")
-	}
 
 	if _, err := col.NewSTM(ctx, a.env.GetEtcdClient(), func(stm col.STM) error {
 		err := a.enterpriseToken.ReadWrite(stm).Delete(enterpriseTokenKey)
