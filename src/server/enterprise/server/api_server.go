@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/pachyderm/pachyderm/src/client"
-	"github.com/pachyderm/pachyderm/src/client/auth"
 	ec "github.com/pachyderm/pachyderm/src/client/enterprise"
 	lc "github.com/pachyderm/pachyderm/src/client/license"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"

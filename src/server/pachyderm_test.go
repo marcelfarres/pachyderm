@@ -26,7 +26,6 @@ import (
 	globlib "github.com/pachyderm/ohmyglob"
 	"github.com/pachyderm/pachyderm/src/client"
 	"github.com/pachyderm/pachyderm/src/client/auth"
-	"github.com/pachyderm/pachyderm/src/client/enterprise"
 	"github.com/pachyderm/pachyderm/src/client/pfs"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"
 	"github.com/pachyderm/pachyderm/src/client/pkg/require"
@@ -4233,10 +4232,8 @@ func TestLokiLogs(t *testing.T) {
 	}
 	c := tu.GetPachClient(t)
 	require.NoError(t, c.DeleteAll())
-	_, err := c.Enterprise.Activate(context.Background(),
-		&enterprise.ActivateRequest{ActivationCode: tu.GetTestEnterpriseCode(t)})
+	tu.ActivateEnterprise(t, c)
 	// create repos
-	require.NoError(t, err)
 	dataRepo := tu.UniqueString("data")
 	require.NoError(t, c.CreateRepo(dataRepo))
 	numFiles := 10
@@ -4245,7 +4242,7 @@ func TestLokiLogs(t *testing.T) {
 	}
 	// create pipeline
 	pipelineName := tu.UniqueString("pipeline")
-	_, err = c.PpsAPIClient.CreatePipeline(context.Background(),
+	_, err := c.PpsAPIClient.CreatePipeline(context.Background(),
 		&pps.CreatePipelineRequest{
 			Pipeline: client.NewPipeline(pipelineName),
 			Transform: &pps.Transform{
