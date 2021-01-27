@@ -112,6 +112,7 @@ var authHandlers = map[string]authHandler{
 	"/license.API/AddCluster":        authDisabledOr(admin),
 	"/license.API/UpdateCluster":     authDisabledOr(admin),
 	"/license.API/DeleteCluster":     authDisabledOr(admin),
+	"/license.API/ListClusters":      authDisabledOr(admin),
 	"/license.API/DeleteAll":         authDisabledOr(admin),
 	// Heartbeat relies on the shared secret generated at cluster registration-time
 	"/license.API/Heartbeat": unauthenticated,

@@ -80,7 +80,6 @@ case "${BUCKET}" in
     make test-deploy-manifests
     # TODO: Readd when s3 gateway is implemented in V2.
     #make test-s3gateway-unit
-    make test-enterprise
     make test-worker
     if [[ "${TRAVIS_SECURE_ENV_VARS:-""}" == "true" ]]; then
         # these tests require secure env vars to run, which aren't available
@@ -113,14 +112,15 @@ case "${BUCKET}" in
     fi
     ;;
   AUTH?)
-    bucket_num="${BUCKET#AUTH}"
-    test_bucket "./src/server/auth/server/testing" test-auth "${bucket_num}" "${AUTH_BUCKETS}"
+    make test-identity
+    make test-auth
     ;;
   OBJECT)
     make test-object-clients
     ;;
-  IDENTITY)
-    make test-identity
+  ENTERPRISE)
+    make test-license
+    make test-enterprise
     ;;
   *)
     echo "Unknown bucket"

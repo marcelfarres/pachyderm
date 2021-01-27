@@ -4,6 +4,7 @@ package license;
 option go_package = "github.com/pachyderm/pachyderm/src/client/license";
 
 import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
 import "client/enterprise/enterprise.proto";
 
 message ActivateRequest {
@@ -55,11 +56,13 @@ message DeleteClusterRequest {
 message DeleteClusterResponse {}
 
 message ClusterStatus {
-  string name = 1;
-  string address = 2;
-  string version = 3;
-  bool auth_enabled = 4;
-  google.protobuf.Timestamp last_heartbeat = 5; 
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  string version = 4;
+  bool auth_enabled = 5 [(gogoproto.moretags) = "db:\"auth_enabled\""];
+  google.protobuf.Timestamp last_heartbeat = 6 [(gogoproto.moretags) = "db:\"last_heartbeat\"", (gogoproto.stdtime) = true]; 
+  google.protobuf.Timestamp created_at = 7 [(gogoproto.moretags) = "db:\"created_at\"", (gogoproto.stdtime) = true]; 
 }
 
 message UpdateClusterRequest {
@@ -71,8 +74,7 @@ message UpdateClusterResponse{}
 
 message ListClustersRequest {}
 message ListClustersResponse {
-  // Clusters is a map of cluster ID -> ClusterStatus
-  map<string, ClusterStatus> clusters = 1;  
+  repeated ClusterStatus clusters = 1;  
 }
 
 message DeleteAllRequest{}

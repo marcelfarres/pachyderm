@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/pachyderm/pachyderm/src/client"
-	"github.com/pachyderm/pachyderm/src/client/auth"
 	ec "github.com/pachyderm/pachyderm/src/client/enterprise"
 	lc "github.com/pachyderm/pachyderm/src/client/license"
 	"github.com/pachyderm/pachyderm/src/client/pkg/errors"
@@ -125,21 +124,6 @@ func (a *apiServer) GetActivationCode(ctx context.Context, req *lc.GetActivation
 	a.LogReq(req)
 	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
 
-	pachClient := a.env.GetPachClient(ctx)
-	whoAmI, err := pachClient.WhoAmI(pachClient.Ctx(), &auth.WhoAmIRequest{})
-	if err != nil {
-		if !auth.IsErrNotActivated(err) {
-			return nil, err
-		}
-	} else {
-		if !whoAmI.IsAdmin {
-			return nil, &auth.ErrNotAuthorized{
-				Subject: whoAmI.Username,
-				AdminOp: "GetActivationCode",
-			}
-		}
-	}
-
 	return a.getLicenseRecord()
 }
 
@@ -148,12 +132,14 @@ func (a *apiServer) getLicenseRecord() (*lc.GetActivationCodeResponse, error) {
 	if !ok {
 		return nil, errors.Errorf("could not retrieve enterprise expiration time")
 	}
+
+	if record.Expires == nil {
+		return &lc.GetActivationCodeResponse{State: ec.State_NONE}, nil
+	}
+
 	expiration, err := types.TimestampFromProto(record.Expires)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not parse expiration timestamp")
-	}
-	if expiration.IsZero() {
-		return &lc.GetActivationCodeResponse{State: ec.State_NONE}, nil
 	}
 	resp := &lc.GetActivationCodeResponse{
 		Info: &ec.TokenInfo{
@@ -178,49 +164,6 @@ func (a *apiServer) checkLicenseState() error {
 		return errors.New("enterprise license is not valid")
 	}
 	return nil
-}
-
-// Deactivate deletes the current enterprise license token, disabling the license service.
-func (a *apiServer) Deactivate(ctx context.Context, req *lc.DeactivateRequest) (resp *lc.DeactivateResponse, retErr error) {
-	a.LogReq(req)
-	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
-
-	// Delete all cluster records
-	if _, err := a.env.GetDBClient().ExecContext(ctx, `DELETE FROM license.clusters`); err != nil {
-		return nil, errors.Wrapf(err, "unable to delete clusters in table")
-	}
-
-	// Delete the license from etcd
-	if _, err := col.NewSTM(ctx, a.env.GetEtcdClient(), func(stm col.STM) error {
-		err := a.enterpriseToken.ReadWrite(stm).Delete(licenseRecordKey)
-		if err != nil && !col.IsErrNotFound(err) {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	// Wait until watcher observes the write
-	if err := backoff.Retry(func() error {
-		record, ok := a.enterpriseTokenCache.Load().(*ec.LicenseRecord)
-		if !ok {
-			return errors.Errorf("could not retrieve enterprise expiration time")
-		}
-		expiration, err := types.TimestampFromProto(record.Expires)
-		if err != nil {
-			return errors.Wrapf(err, "could not parse expiration timestamp")
-		}
-		if !expiration.IsZero() {
-			return errors.Errorf("enterprise still activated")
-		}
-		return nil
-	}, backoff.RetryEvery(time.Second)); err != nil {
-		return nil, err
-	}
-	time.Sleep(time.Second) // give other pachd nodes time to observe the write
-
-	return &lc.DeactivateResponse{}, nil
 }
 
 // AddCluster registers a new pachd with this license server. Each pachd is configured with a shared secret
@@ -261,7 +204,7 @@ func (a *apiServer) AddCluster(ctx context.Context, req *lc.AddClusterRequest) (
 	}
 
 	// Register the pachd in the database
-	if _, err := a.env.GetDBClient().ExecContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, enabled, auth_enabled) VALUES ($1, $2, $3, $4, $5, $6)`, req.Id, req.Address, secret, version.String(versionResp), true, false); err != nil {
+	if _, err := a.env.GetDBClient().ExecContext(ctx, `INSERT INTO license.clusters (id, address, secret, version, auth_enabled) VALUES ($1, $2, $3, $4, $5)`, req.Id, req.Address, secret, version.String(versionResp), false); err != nil {
 		return nil, errors.Wrapf(err, "unable to register pachd in database")
 	}
 
@@ -275,7 +218,7 @@ func (a *apiServer) Heartbeat(ctx context.Context, req *lc.HeartbeatRequest) (re
 	defer func(start time.Time) { a.pachLogger.Log(nil, resp, retErr, time.Since(start)) }(time.Now())
 
 	var count int
-	if err := a.env.GetDBClient().GetContext(ctx, &count, `SELECT COUNT(*) FROM license.clusters WHERE id=$1 and secret=$2 and enabled`, req.Id, req.Secret); err != nil {
+	if err := a.env.GetDBClient().GetContext(ctx, &count, `SELECT COUNT(*) FROM license.clusters WHERE id=$1 and secret=$2`, req.Id, req.Secret); err != nil {
 		return nil, errors.Wrapf(err, "unable to look up cluster in database")
 	}
 
@@ -298,6 +241,9 @@ func (a *apiServer) Heartbeat(ctx context.Context, req *lc.HeartbeatRequest) (re
 }
 
 func (a *apiServer) DeleteAll(ctx context.Context, req *lc.DeleteAllRequest) (resp *lc.DeleteAllResponse, retErr error) {
+	a.LogReq(req)
+	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+
 	if _, err := a.env.GetDBClient().ExecContext(ctx, `DELETE FROM license.clusters`); err != nil {
 		return nil, errors.Wrapf(err, "unable to delete clusters in database")
 	}
@@ -330,13 +276,38 @@ func (a *apiServer) DeleteAll(ctx context.Context, req *lc.DeleteAllRequest) (re
 }
 
 func (a *apiServer) ListClusters(ctx context.Context, req *lc.ListClustersRequest) (resp *lc.ListClustersResponse, retErr error) {
-	return nil, nil
+	a.LogReq(req)
+	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+
+	clusters := make([]*lc.ClusterStatus, 0)
+	err := a.env.GetDBClient().SelectContext(ctx, &clusters, "SELECT id, address, version, auth_enabled, last_heartbeat FROM license.clusters;")
+	if err != nil {
+		return nil, err
+	}
+
+	return &lc.ListClustersResponse{
+		Clusters: clusters,
+	}, nil
 }
 
 func (a *apiServer) DeleteCluster(ctx context.Context, req *lc.DeleteClusterRequest) (resp *lc.DeleteClusterResponse, retErr error) {
-	return nil, nil
+	a.LogReq(req)
+	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+
+	_, err := a.env.GetDBClient().ExecContext(ctx, "DELETE FROM license.clusters WHERE id=?", req.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &lc.DeleteClusterResponse{}, nil
 }
 
 func (a *apiServer) UpdateCluster(ctx context.Context, req *lc.UpdateClusterRequest) (resp *lc.UpdateClusterResponse, retErr error) {
-	return nil, nil
+	a.LogReq(req)
+	defer func(start time.Time) { a.pachLogger.Log(req, resp, retErr, time.Since(start)) }(time.Now())
+
+	_, err := a.env.GetDBClient().ExecContext(ctx, "UPDATE license.clusters SET name=?, address=? WHERE id=?", req.Name, req.Address, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &lc.UpdateClusterResponse{}, nil
 }
